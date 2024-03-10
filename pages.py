@@ -83,9 +83,15 @@ class LoginPage(tk.Frame):
         self.entry_pass.bind('<FocusIn>', self.entry_pass_enter)
         self.entry_pass.bind('<FocusOut>', self.entry_pass_leave)
 
-        self.login_btn = tk.Button(self, text='LOGIN', font=('Montserrat', 13, 'bold'), 
-                                   fg='#00FF00', bg='#0c0c0c', width=10)
-        self.canvas.create_window(self.canvas_width // 1.75 , self.canvas_height // 1.5, window=self.login_btn)
+        self.login_btn = tk.Button(self, text='LOGIN', font=('Montserrat', 17, 'bold'), 
+                                   fg='#00FF00', bg='#0c0c0c', width=25)
+        self.canvas.create_window(self.canvas_width // 1.75 , self.canvas_height // 1.3, window=self.login_btn)
+
+        self.forgot_pass_label = tk.Label(self, text='Forgot Password', font=('Montserrat', 11, 'underline'), bg='#0c0c0c', fg='white')
+        self.canvas.create_window(self.canvas_width // 3.4 , self.canvas_height // 1.6, window=self.forgot_pass_label)
+
+        self.signup_label = tk.Label(self, text='SIGN-UP', font=('Montserrat', 11, 'bold'), bg='#0c0c0c', fg='#00FF00')
+        self.canvas.create_window(self.canvas_width // 1.11 , self.canvas_height // 1.6, window=self.signup_label)
 
     def entry_user_enter(self, event):
         if self.entry_email.get() == 'Email':
