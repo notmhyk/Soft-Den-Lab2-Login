@@ -36,9 +36,9 @@ class FadingLabel(tk.Label):
             self.config(highlightbackground=self.fade_out_color)
 
 class LoginPage(tk.Frame):
-    def __init__(self):
-        super().__init__()
-
+    def __init__(self, master):
+        super().__init__(master)
+        self.parent = master
         self.config(background='black')
 
 
@@ -60,7 +60,7 @@ class LoginPage(tk.Frame):
         self.canvas_height = 500
         self.canvas = tk.Canvas(self, width=self.canvas_width, height=self.canvas_height, bg='#0c0c0c', highlightbackground='#00FF00', highlightthickness=2)
         self.canvas.grid(row=1, column=4, rowspan=7, columnspan=8, sticky='nsew')
-        self.canvas.bind('<Button-1>', self.canvas_clicked)
+        # self.canvas.bind('<Button-1>', self.canvas_clicked)
         self.show_object()
 
     def show_object(self):
@@ -73,8 +73,7 @@ class LoginPage(tk.Frame):
         self.canvas.create_window(self.canvas_width // 1.75 , self.canvas_height // 3, window=self.entry_email)
 
         self.entry_email.insert(0, 'Email')
-        self.entry_email.bind('<FocusIn>', self.entry_user_enter)
-        self.entry_email.bind('<FocusOut>', self.entry_user_leave)
+        
 
         self.entry_pass = tk.Entry(self, font=('Montserrat', 17), width=30, justify='center', fg='white', bg='#323232')
         self.canvas.create_window(self.canvas_width // 1.75 , self.canvas_height // 2, window=self.entry_pass)
@@ -84,14 +83,23 @@ class LoginPage(tk.Frame):
         self.entry_pass.bind('<FocusOut>', self.entry_pass_leave)
 
         self.login_btn = tk.Button(self, text='LOGIN', font=('Montserrat', 17, 'bold'), 
-                                   fg='#00FF00', bg='#0c0c0c', width=25)
+                                   fg='#00FF00', bg='#0c0c0c', width=25, cursor='hand2')
         self.canvas.create_window(self.canvas_width // 1.75 , self.canvas_height // 1.3, window=self.login_btn)
 
-        self.forgot_pass_label = tk.Label(self, text='Forgot Password', font=('Montserrat', 11, 'underline'), bg='#0c0c0c', fg='white')
+        self.forgot_pass_label = tk.Label(self, text='Forgot Password', font=('Montserrat', 11, 'underline'), bg='#0c0c0c', fg='white', cursor='hand2')
         self.canvas.create_window(self.canvas_width // 3.4 , self.canvas_height // 1.6, window=self.forgot_pass_label)
 
-        self.signup_label = tk.Label(self, text='SIGN-UP', font=('Montserrat', 11, 'bold'), bg='#0c0c0c', fg='#00FF00')
+        self.signup_label = tk.Label(self, text='SIGN-UP', font=('Montserrat', 11, 'bold'), bg='#0c0c0c', fg='#00FF00', cursor='hand2')
         self.canvas.create_window(self.canvas_width // 1.11 , self.canvas_height // 1.6, window=self.signup_label)
+
+        self.signup_label.bind('<Button-1>', self.on_click_sign_up)
+        self.entry_email.bind('<FocusIn>', self.entry_user_enter)
+        self.entry_email.bind('<FocusOut>', self.entry_user_leave)
+        self.canvas.bind('<Button-1>', self.canvas_clicked)
+        
+
+    def on_click_sign_up(self, event):
+        self.parent.change_frame('SignUpPage')
 
     def entry_user_enter(self, event):
         if self.entry_email.get() == 'Email':
@@ -120,5 +128,15 @@ class LoginPage(tk.Frame):
             self.focus_set()
         else:
             self.focus_set()
+        
 
+class SignUpPage(tk.Frame):
+    def __init__(self, master):
+        tk.Frame.__init__(self, master)
+        self.parent = master
+        self.label = tk.Label(self, text='hello')
+        self.label.pack()
+        self.label.bind('<Button-1>', self.onclick)
 
+    def onclick(self, event):
+        self.parent.change_frame('LoginPage')
