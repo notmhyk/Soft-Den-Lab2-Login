@@ -1,10 +1,12 @@
 import tkinter as tk
 import pages
+import db_handler
 
 class MainWindow(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
         self.title('Login/Logout')
+        self.db_handler = db_handler.DBHandler()
         self.frames = dict()
         self.frames['LoginPage'] = pages.LoginPage(self)
         self.frames['SignUpPage'] = pages.SignUpPage(self)

@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
+import db_handler
+import models
 
 class FadingLabel(tk.Label):
     def __init__(self, master=None, **kwargs):
@@ -222,7 +224,7 @@ class SignUpPage(tk.Frame):
         self.pil_image_back_image = Image.open(self.back_image_path)
         self.resize_back_image = self.pil_image_back_image.resize((30,30))
         self.image_back_image = ImageTk.PhotoImage(self.resize_back_image)
-        self.back_button = tk.Label(self, image=self.image_back_image, bg='#0c0c0c')
+        self.back_button = tk.Label(self, image=self.image_back_image, bg='#0c0c0c', cursor='hand2')
         self.canvas.create_window(self.canvas_width // 0.74, self.canvas_height // 10, window=self.back_button)
 
 
@@ -375,3 +377,4 @@ class SignUpPage(tk.Frame):
 
     def onclick(self, event):
         self.parent.change_frame('LoginPage')
+
