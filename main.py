@@ -8,7 +8,7 @@ class MainWindow(tk.Tk):
         self.frames = dict()
         self.frames['LoginPage'] = pages.LoginPage(self)
         self.frames['SignUpPage'] = pages.SignUpPage(self)
-        self.change_frame('LoginPage')
+        self.change_frame('SignUpPage')
 
     def change_frame(self, name):
         for frame in self.frames.values():
