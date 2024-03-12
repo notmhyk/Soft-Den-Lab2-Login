@@ -67,27 +67,26 @@ class LoginPage(tk.Frame):
                                      fg='#00FF00', bg='#0c0c0c')
         self.canvas.create_window(self.canvas_width // 1.75 , self.canvas_height // 6, window=self.sign_in_lb)
 
-        self.entry_email = tk.Entry(self, font=('Montserrat', 17), width=30, justify='center', fg='white', bg='#323232')
+        self.entry_email = tk.Entry(self, font=('Monospac821 BT', 17), width=30, justify='center', fg='white', bg='#323232')
         self.canvas.create_window(self.canvas_width // 1.75 , self.canvas_height // 3, window=self.entry_email)
 
         self.entry_email.insert(0, 'Email')
         
 
-        self.entry_pass = tk.Entry(self, font=('Montserrat', 17), width=30, justify='center', fg='white', bg='#323232')
+        self.entry_pass = tk.Entry(self, font=('Monospac821 BT', 17), width=30, justify='center', fg='white', bg='#323232')
         self.canvas.create_window(self.canvas_width // 1.75 , self.canvas_height // 2, window=self.entry_pass)
 
         self.entry_pass.insert(0, 'Password')
-        
 
         self.login_btn = tk.Button(self, text='LOGIN', font=('Montserrat', 17, 'bold'), 
                                    fg='#00FF00', bg='#0c0c0c', width=25, cursor='hand2')
         self.canvas.create_window(self.canvas_width // 1.75 , self.canvas_height // 1.3, window=self.login_btn)
 
-        self.forgot_pass_label = tk.Label(self, text='Forgot Password', font=('Montserrat', 11, 'underline'), 
+        self.forgot_pass_label = tk.Label(self, text='Forgot Password', font=('Monospac821 BT', 11, 'underline'), 
                                           bg='#0c0c0c', fg='white', cursor='hand2')
         self.canvas.create_window(self.canvas_width // 3.4 , self.canvas_height // 1.6, window=self.forgot_pass_label)
 
-        self.signup_label = tk.Label(self, text='SIGN-UP', font=('Montserrat', 11, 'bold'), bg='#0c0c0c', fg='#00FF00', cursor='hand2')
+        self.signup_label = tk.Label(self, text='SIGN-UP', font=('Monospac821 BT', 11), bg='#0c0c0c', fg='#00FF00', cursor='hand2')
         self.canvas.create_window(self.canvas_width // 1.11 , self.canvas_height // 1.6, window=self.signup_label)
 
         self.bind()
