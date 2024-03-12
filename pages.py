@@ -161,33 +161,71 @@ class SignUpPage(tk.Frame):
         self.image_path = 'border.png'
         
         self.image_pil = Image.open(self.image_path)
-        self.resize_image = self.image_pil.resize((330,250))
+        self.resize_image = self.image_pil.resize((330,220))
         self.image = ImageTk.PhotoImage(self.resize_image)
-        self.canvas.create_image(self.canvas_width // 3, self.canvas_height // 3, image=self.image)
+        self.canvas.create_image(self.canvas_width // 3, self.canvas_height // 2.6, image=self.image)
         
         self.label = tk.Label(self, text='Create Account', font=('Montserrat', 25, 'bold'), fg='#00FF00', bg='#0c0c0c')
         self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 15, window=self.label)
 
-        self.personal_label = tk.Label(self, text='Personal Info', font=('Montserrat', 10, 'bold'), fg='#00FF00', bg='#0c0c0c')
-        self.canvas.create_window(self.canvas_width // 9, self.canvas_height // 11, window=self.personal_label)
+        self.personal_label = tk.Label(self, text='Personal Info', font=('Monospac821 BT', 11), fg='#00FF00', bg='#0c0c0c')
+        self.canvas.create_window(self.canvas_width // 7, self.canvas_height // 6, window=self.personal_label)
 
-        self.fname_entry = tk.Entry(self, font=('Montserrat', 12), width=20, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 3, self.canvas_height // 5, window=self.fname_entry)
+        self.fname_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
+        self.canvas.create_window(self.canvas_width // 3, self.canvas_height // 3.7, window=self.fname_entry)
 
-        self.mname_entry = tk.Entry(self, font=('Montserrat', 12), width=20, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 3, self.canvas_height // 3, window=self.mname_entry)
+        self.mname_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
+        self.canvas.create_window(self.canvas_width // 3, self.canvas_height // 2.6, window=self.mname_entry)
 
-        self.lname_entry = tk.Entry(self, font=('Montserrat', 12), width=20, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 3, self.canvas_height // 2.18, window=self.lname_entry)
+        self.lname_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
+        self.canvas.create_window(self.canvas_width // 3, self.canvas_height // 2, window=self.lname_entry)
+        
 
-        self.email_entry = tk.Entry(self, font=('Montserrat', 12), width=20, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 3, self.canvas_height // 1.7, window=self.email_entry)
+        self.image_pil2 = Image.open(self.image_path)
+        self.resize_image2 = self.image_pil2.resize((330,210))
+        self.image2 = ImageTk.PhotoImage(self.resize_image2)
+        self.canvas.create_image(self.canvas_width // 3, self.canvas_height // 1.2, image=self.image2)
 
-        self.pass_entry = tk.Entry(self, font=('Montserrat', 12), width=20, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 3, self.canvas_height // 1.4, window=self.pass_entry)
+        self.other_label = tk.Label(self, text='Other Info', font=('Monospac821 BT', 11), fg='#00FF00', bg='#0c0c0c')
+        self.canvas.create_window(self.canvas_width // 7, self.canvas_height // 1.6, window=self.other_label)
 
-        self.confirm_pass_entry = tk.Entry(self, font=('Montserrat', 12), width=20, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 3, self.canvas_height // 1.2, window=self.confirm_pass_entry)
+        self.contact_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
+        self.canvas.create_window(self.canvas_width // 3, self.canvas_height // 1.4, window=self.contact_entry)
+
+        self.city_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
+        self.canvas.create_window(self.canvas_width // 3, self.canvas_height // 1.2, window=self.city_entry)
+
+        self.province_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
+        self.canvas.create_window(self.canvas_width // 3, self.canvas_height // 1.05, window=self.province_entry)
+
+        self.account_label = tk.Label(self, text='Account Info', font=('Monospac821 BT', 11), fg='#00FF00', bg='#0c0c0c')
+        self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 4, window=self.account_label)
+
+        self.email_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=30, justify='center', fg='white', bg='#323232')
+        self.canvas.create_window(self.canvas_width // 1, self.canvas_height // 2.7, window=self.email_entry)
+
+        self.pass_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=30, justify='center', fg='white', bg='#323232')
+        self.canvas.create_window(self.canvas_width // 1, self.canvas_height // 2, window=self.pass_entry)
+
+        self.confirm_pass_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=30, justify='center', fg='white', bg='#323232')
+        self.canvas.create_window(self.canvas_width // 1, self.canvas_height // 1.57, window=self.confirm_pass_entry)
+
+        self.image_pil3 = Image.open(self.image_path)
+        self.resize_image3 = self.image_pil3.resize((420,370))
+        self.image3 = ImageTk.PhotoImage(self.resize_image3)
+        self.canvas.create_image(self.canvas_width // 1, self.canvas_height // 1.7, image=self.image3)
+
+        self.create_btn = tk.Button(self, text='Create Account', font=('Montserrat', 14, 'bold'), 
+                                   fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2')
+        self.canvas.create_window(self.canvas_width // 1 , self.canvas_height // 1.3, window=self.create_btn)
+
+        self.back_image_path = 'back.png'
+        self.pil_image_back_image = Image.open(self.back_image_path)
+        self.resize_back_image = self.pil_image_back_image.resize((30,30))
+        self.image_back_image = ImageTk.PhotoImage(self.resize_back_image)
+        self.back_button = tk.Label(self, image=self.image_back_image, bg='#0c0c0c')
+        self.canvas.create_window(self.canvas_width // 0.74, self.canvas_height // 10, window=self.back_button)
+
 
         self.fname_entry.insert(0, 'First Name')
         self.mname_entry.insert(0, 'Middle Name')
@@ -195,6 +233,9 @@ class SignUpPage(tk.Frame):
         self.email_entry.insert(0, 'Email')
         self.pass_entry.insert(0, 'Password')
         self.confirm_pass_entry.insert(0, 'Confirm Password')
+        self.contact_entry.insert(0, 'Contact Number')
+        self.city_entry.insert(0, 'City')
+        self.province_entry.insert(0, 'Province')
 
         self.bind()
 
@@ -212,7 +253,48 @@ class SignUpPage(tk.Frame):
         self.confirm_pass_entry.bind('<FocusIn>', self.confirm_pass_entry_enter)
         self.confirm_pass_entry.bind('<FocusOut>', self.confirm_pass_entry_leave)
         self.canvas.bind('<Button-1>', self.canvas_clicked)
+        self.contact_entry.bind('<FocusIn>', self.contact_entry_enter)
+        self.contact_entry.bind('<FocusOut>', self.contact_entry_leave)
+        self.city_entry.bind('<FocusIn>', self.city_entry_enter)
+        self.city_entry.bind('<FocusOut>', self.city_entry_leave)
+        self.province_entry.bind('<FocusIn>', self.province_entry_enter)
+        self.province_entry.bind('<FocusOut>', self.province_entry_leave)
+        self.back_button.bind('<Button-1>', self.onclick_back)
 
+    def onclick_back(self, event):
+        self.back_button.config(bg='#323232')
+        self.parent.change_frame('LoginPage')
+
+    def city_entry_enter(self, event):
+        if self.city_entry.get() == 'City':
+            self.city_entry.delete(0, tk.END)
+            self.city_entry.insert(0, '')
+    
+    def city_entry_leave(self, event):
+        if self.city_entry.get() == '':
+            self.city_entry.delete(0, tk.END)
+            self.city_entry.insert(0, 'City')
+
+    def province_entry_enter(self, event):
+        if self.province_entry.get() == 'Province':
+            self.province_entry.delete(0, tk.END)
+            self.province_entry.insert(0, '')
+
+    def province_entry_leave(self, event):
+        if self.province_entry.get() == '':
+            self.province_entry.delete(0, tk.END)
+            self.province_entry.insert(0, 'Province')
+
+    def contact_entry_enter(self, event):
+        if self.contact_entry.get() == 'Contact Number':
+            self.contact_entry.delete(0, tk.END)
+            self.contact_entry.insert(0, '')
+            
+    def contact_entry_leave(self, event):
+        if self.contact_entry.get() == '':
+            self.contact_entry.delete(0, tk.END)
+            self.contact_entry.insert(0, 'Contact Number')
+    
     def confirm_pass_entry_enter(self, event):
         if self.confirm_pass_entry.get() == 'Confirm Password':
             self.confirm_pass_entry.delete(0, tk.END)
