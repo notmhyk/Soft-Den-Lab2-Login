@@ -281,7 +281,13 @@ class SignUpPage(tk.Frame):
         elif not province.isalpha():
             messagebox.showerror('Error', 'Province must contain only letters')
             return
-        
+        if len(contact) != 13:
+            messagebox.showerror('Error', 'Contact Number must be 13 digits')
+            return
+        elif len(password) <= 5:
+            messagebox.showerror('Error', 'Password must be at least 6 characters')
+            return
+            
         profile = models.Profiles()
         profile.fname = fname
         profile.mname = mname
