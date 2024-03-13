@@ -1,8 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
+from tkinter import messagebox
 import db_handler
 import models
+
 
 class FadingLabel(tk.Label):
     def __init__(self, master=None, **kwargs):
@@ -217,7 +219,7 @@ class SignUpPage(tk.Frame):
         self.canvas.create_image(self.canvas_width // 1, self.canvas_height // 1.7, image=self.image3)
 
         self.create_btn = tk.Button(self, text='Create Account', font=('Montserrat', 14, 'bold'), 
-                                   fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2')
+                                   fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command=self.onclick_create)
         self.canvas.create_window(self.canvas_width // 1 , self.canvas_height // 1.3, window=self.create_btn)
 
         self.back_image_path = 'back.png'
@@ -227,18 +229,48 @@ class SignUpPage(tk.Frame):
         self.back_button = tk.Label(self, image=self.image_back_image, bg='#0c0c0c', cursor='hand2')
         self.canvas.create_window(self.canvas_width // 0.74, self.canvas_height // 10, window=self.back_button)
 
-
         self.fname_entry.insert(0, 'First Name')
         self.mname_entry.insert(0, 'Middle Name')
         self.lname_entry.insert(0, 'Last Name')
-        self.email_entry.insert(0, 'Email')
-        self.pass_entry.insert(0, 'Password')
-        self.confirm_pass_entry.insert(0, 'Confirm Password')
         self.contact_entry.insert(0, 'Contact Number')
         self.city_entry.insert(0, 'City')
         self.province_entry.insert(0, 'Province')
+        self.email_entry.insert(0, 'Email')
+        self.pass_entry.insert(0, 'Password')
+        self.confirm_pass_entry.insert(0, 'Confirm Password')
 
         self.bind()
+
+    def onclick_create(self):
+        fname = self.fname_entry.get()
+        mname = self.mname_entry.get()
+        lname = self.lname_entry.get()
+        contact = self.contact_entry.get()
+        city = self.city_entry.get()
+        province = self.province_entry.get()
+        email = self.email_entry.get()
+        password = self.pass_entry.get()
+        confirm_password = self.confirm_pass_entry.get()
+
+        if fname == 'First Name' or mname == 'Middle Name' or lname == 'Last Name' or contact == 'Contact Number' or city == 'City' or province == 'Province' or email == 'Email' or password == 'Password' or confirm_password == 'Confirm Password':
+            messagebox.showerror('Error', 'Please fill all the fields')
+        elif password!= confirm_password:
+            messagebox.showerror('Error', 'Passwords do not match')
+        else:
+            profile = models.Profiles()
+            profile.fname = fname
+            profile.mname = mname
+            profile.lname = lname
+            profile.contact = contact
+            profile.city = city
+            profile.province = province
+            profile.email = email
+            profile.password = password
+            db_conn = db_handler.DBHandler()
+            db_conn.insert_account(profile)
+            db_conn.close()
+            messagebox.showinfo('Successfully Created', f'Welcome {fname}')
+            self.parent.change_frame('LoginPage')
 
     def bind(self):
         self.fname_entry.bind('<FocusIn>', self.fname_entry_enter)
@@ -263,8 +295,28 @@ class SignUpPage(tk.Frame):
         self.back_button.bind('<Button-1>', self.onclick_back)
 
     def onclick_back(self, event):
+        fname = self.fname_entry.get()
+        mname = self.mname_entry.get()
+        lname = self.lname_entry.get()
+        contact = self.contact_entry.get()
+        city = self.city_entry.get()
+        province = self.province_entry.get()
+        email = self.email_entry.get()
+        password = self.pass_entry.get()
+        confirm_password = self.confirm_pass_entry.get()
+
+        if  fname == 'First Name' and mname == 'Middle Name' and lname == 'Last Name' and contact == 'Contact Number' and city == 'City' and province == 'Province' and email == 'Email' and password == 'Password' and confirm_password == 'Confirm Password':
+            self.parent.change_frame('LoginPage')
+        elif fname or mname or lname or contact or city or province or email or password or confirm_password:
+            confirmed = messagebox.askyesno('Warning', 'Are you sure you want to cancel?')
+            if not confirmed:
+                return
+            else:
+                self.parent.change_frame('LoginPage')
+        else:
+            return
         self.back_button.config(bg='#323232')
-        self.parent.change_frame('LoginPage')
+        # self.parent.change_frame('LoginPage')
 
     def city_entry_enter(self, event):
         if self.city_entry.get() == 'City':
@@ -289,10 +341,10 @@ class SignUpPage(tk.Frame):
     def contact_entry_enter(self, event):
         if self.contact_entry.get() == 'Contact Number':
             self.contact_entry.delete(0, tk.END)
-            self.contact_entry.insert(0, '')
+            self.contact_entry.insert(0, '+63')
             
     def contact_entry_leave(self, event):
-        if self.contact_entry.get() == '':
+        if self.contact_entry.get() == '' or self.contact_entry.get() == '+63':
             self.contact_entry.delete(0, tk.END)
             self.contact_entry.insert(0, 'Contact Number')
     
