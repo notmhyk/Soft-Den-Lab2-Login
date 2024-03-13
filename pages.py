@@ -230,7 +230,7 @@ class SignUpPage(tk.Frame):
         self.canvas.create_window(self.canvas_width // 0.74, self.canvas_height // 10, window=self.back_button)
 
         self.fname_entry.insert(0, 'First Name')
-        self.mname_entry.insert(0, 'Middle Name')
+        self.mname_entry.insert(0, 'MI (Optional)')
         self.lname_entry.insert(0, 'Last Name')
         self.contact_entry.insert(0, 'Contact Number')
         self.city_entry.insert(0, 'City')
@@ -252,25 +252,50 @@ class SignUpPage(tk.Frame):
         password = self.pass_entry.get()
         confirm_password = self.confirm_pass_entry.get()
 
-        if fname == 'First Name' or mname == 'Middle Name' or lname == 'Last Name' or contact == 'Contact Number' or city == 'City' or province == 'Province' or email == 'Email' or password == 'Password' or confirm_password == 'Confirm Password':
+        if fname == 'First Name'or lname == 'Last Name' or contact == 'Contact Number' or city == 'City' or province == 'Province' or email == 'Email' or password == 'Password' or confirm_password == 'Confirm Password':
             messagebox.showerror('Error', 'Please fill all the fields')
+            return
         elif password!= confirm_password:
             messagebox.showerror('Error', 'Passwords do not match')
-        else:
-            profile = models.Profiles()
-            profile.fname = fname
-            profile.mname = mname
-            profile.lname = lname
-            profile.contact = contact
-            profile.city = city
-            profile.province = province
-            profile.email = email
-            profile.password = password
-            db_conn = db_handler.DBHandler()
-            db_conn.insert_account(profile)
-            db_conn.close()
-            messagebox.showinfo('Successfully Created', f'Welcome {fname}')
-            self.parent.change_frame('LoginPage')
+            return
+        elif not fname.isalpha():
+            messagebox.showerror('Error', 'First Name must contain only letters')
+            return
+        elif not mname.isalpha():
+            if mname == 'MI (Optional)':
+                mname = 'N/A'
+            elif not mname.strip():
+                mname = 'N/A'
+            else:
+                messagebox.showerror('Error', 'Middle Name must contain only letters')
+                return
+        elif not lname.isalpha():
+            messagebox.showerror('Error', 'Last Name must contain only letters')
+            return
+        elif not contact.replace("+", "").replace(" ", "").isdigit():
+            messagebox.showerror('Error', 'Contact Number must contain only numbers')
+            return
+        elif not city.isalpha():
+            messagebox.showerror('Error', 'City must contain only letters')
+            return
+        elif not province.isalpha():
+            messagebox.showerror('Error', 'Province must contain only letters')
+            return
+        
+        profile = models.Profiles()
+        profile.fname = fname
+        profile.mname = mname
+        profile.lname = lname
+        profile.contact = contact
+        profile.city = city
+        profile.province = province
+        profile.email = email
+        profile.password = password
+        db_conn = db_handler.DBHandler()
+        db_conn.insert_account(profile)
+        db_conn.close()
+        messagebox.showinfo('Successfully Created', f'Welcome {fname}')
+        self.parent.change_frame('LoginPage')
 
     def bind(self):
         self.fname_entry.bind('<FocusIn>', self.fname_entry_enter)
@@ -305,7 +330,7 @@ class SignUpPage(tk.Frame):
         password = self.pass_entry.get()
         confirm_password = self.confirm_pass_entry.get()
 
-        if  fname == 'First Name' and mname == 'Middle Name' and lname == 'Last Name' and contact == 'Contact Number' and city == 'City' and province == 'Province' and email == 'Email' and password == 'Password' and confirm_password == 'Confirm Password':
+        if  fname == 'First Name' and mname == 'MI (Optional)' and lname == 'Last Name' and contact == 'Contact Number' and city == 'City' and province == 'Province' and email == 'Email' and password == 'Password' and confirm_password == 'Confirm Password':
             self.parent.change_frame('LoginPage')
         elif fname or mname or lname or contact or city or province or email or password or confirm_password:
             confirmed = messagebox.askyesno('Warning', 'Are you sure you want to cancel?')
@@ -316,7 +341,6 @@ class SignUpPage(tk.Frame):
         else:
             return
         self.back_button.config(bg='#323232')
-        # self.parent.change_frame('LoginPage')
 
     def city_entry_enter(self, event):
         if self.city_entry.get() == 'City':
@@ -371,24 +395,24 @@ class SignUpPage(tk.Frame):
             self.email_entry.insert(0, '')
 
     def mname_entry_enter(self, event):
-        if self.mname_entry.get() == 'Middle Name':
+        if self.mname_entry.get() == 'MI (Optional)':
             self.mname_entry.delete(0, tk.END)
             self.mname_entry.insert(0, '')
     
     def mname_entry_leave(self, event):
         if self.mname_entry.get() == '':
             self.mname_entry.delete(0, tk.END)
-            self.mname_entry.insert(0, 'Middle Name')
+            self.mname_entry.insert(0, 'MI (Optional)')
 
-    def mname_entry_enter(self, event):
-        if self.mname_entry.get() == 'Middle Name':
-            self.mname_entry.delete(0, tk.END)
-            self.mname_entry.insert(0, '')
+    # def mname_entry_enter(self, event):
+    #     if self.mname_entry.get() == 'Middle Name':
+    #         self.mname_entry.delete(0, tk.END)
+    #         self.mname_entry.insert(0, '')
     
-    def mname_entry_leave(self, event):
-        if self.mname_entry.get() == '':
-            self.mname_entry.delete(0, tk.END)
-            self.mname_entry.insert(0, 'Middle Name')
+    # def mname_entry_leave(self, event):
+    #     if self.mname_entry.get() == '':
+    #         self.mname_entry.delete(0, tk.END)
+    #         self.mname_entry.insert(0, 'Middle Name')
 
     def lname_entry_leave(self, event):
         if self.lname_entry.get() == '':
