@@ -83,7 +83,7 @@ class LoginPage(tk.Frame):
         self.entry_pass.insert(0, 'Password')
 
         self.login_btn = tk.Button(self, text='LOGIN', font=('Montserrat', 17, 'bold'), 
-                                   fg='#00FF00', bg='#0c0c0c', width=25, cursor='hand2')
+                                   fg='#00FF00', bg='#0c0c0c', width=25, cursor='hand2', command=self.onclick_login)
         self.canvas.create_window(self.canvas_width // 1.75 , self.canvas_height // 1.3, window=self.login_btn)
 
         self.forgot_pass_label = tk.Label(self, text='Forgot Password', font=('Monospac821 BT', 11, 'underline'), 
@@ -94,6 +94,25 @@ class LoginPage(tk.Frame):
         self.canvas.create_window(self.canvas_width // 1.11 , self.canvas_height // 1.6, window=self.signup_label)
 
         self.bind()
+
+    def onclick_login(self):
+        email = self.entry_email.get()
+        password = self.entry_pass.get()
+        
+        if email == '':
+            messagebox.showerror('Error', 'Email cannot be empty')
+            return
+        elif password == '':
+            messagebox.showerror('Error', 'Password cannot be empty')
+            return
+        
+        if self.parent.db_handler.acc_login(email, password):
+            self.parent.change_frame('LandingPage')
+        elif self.parent.db_handler.admin_login(email, password):
+            self.parent.change_frame('AdminPage')
+        else:
+            messagebox.showerror("Invalid Login", "Invalid username or password")
+        
 
     def bind(self):
         self.entry_pass.bind('<FocusIn>', self.entry_pass_enter)
@@ -460,3 +479,19 @@ class SignUpPage(tk.Frame):
     def onclick(self, event):
         self.parent.change_frame('LoginPage')
 
+class LandingPage(tk.Frame):
+    def __init__(self, master):
+        tk.Frame.__init__(self, master)
+        self.master = master
+        self.master.title('Landing Page')
+        self.label = tk.Label(self, text='LANDING PAGE')
+        self.label.grid(row=0, column=0)
+        
+
+class AdminPage(tk.Frame):
+    def __init__(self, master):
+        tk.Frame.__init__(self, master)
+        self.master = master
+        self.master.title('Admin Page')
+        self.label = tk.Label(self, text='ADMIN PAGE')
+        self.label.grid(row=0, column=0)

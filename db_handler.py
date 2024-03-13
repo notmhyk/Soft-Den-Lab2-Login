@@ -6,6 +6,7 @@ class DBHandler:
     def __init__(self):
         self.profile_db = 'database.db'
         self.profile_table = 'profiles'
+        self.admin_table = 'admin_acc'
 
         self.conn = sqlite3.connect(self.profile_db)
         self.cursor = self.conn.cursor()
@@ -23,6 +24,30 @@ class DBHandler:
         values = (profile.fname, profile.mname, profile.lname, profile.contact, profile.city, profile.province, profile.email, profile.password)
         self.cursor.execute(query, values)
         self.conn.commit()
+    
+    def acc_login(self, email, password):
+        query = f'SELECT * FROM {self.profile_table} WHERE email =? AND password =?'
+        values = (email, password)
+        self.cursor.execute(query, values)
+        
+        result = self.cursor.fetchone()
+
+        if result:
+            return True
+        else:
+            return False
+
+    def admin_login(self, email, password):
+        query = f'SELECT * FROM {self.admin_table} WHERE username =? AND password =?'
+        values = (email, password)
+        self.cursor.execute(query, values)
+        # self.cursor.execute(query, (email, password))
+        result = self.cursor.fetchone()
+
+        if result:
+            return True
+        else:
+            return False
 
     def close(self):
         self.conn.close()
