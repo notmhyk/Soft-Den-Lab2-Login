@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import scrolledtext
 from PIL import Image, ImageTk
 from tkinter import messagebox
 import db_handler
@@ -175,7 +176,7 @@ class SignUpPage(tk.Frame):
         self.canvas_width = 600
         self.canvas_height = 500
         self.canvas = tk.Canvas(self, width=self.canvas_width, height=self.canvas_height, bg='#0c0c0c', highlightbackground='#00FF00', highlightthickness=2)
-        self.canvas.grid(row=1, column=3, rowspan=7, columnspan=10, sticky='nsew')
+        self.canvas.grid(row=1, column=2, rowspan=7, columnspan=12, sticky='nsew')
         self.show_object()
         
     def show_object(self):
@@ -221,32 +222,62 @@ class SignUpPage(tk.Frame):
         self.canvas.create_window(self.canvas_width // 3, self.canvas_height // 1.05, window=self.province_entry)
 
         self.account_label = tk.Label(self, text='Account Info', font=('Monospac821 BT', 11), fg='#00FF00', bg='#0c0c0c')
-        self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 4, window=self.account_label)
+        self.canvas.create_window(self.canvas_width // 1.5, self.canvas_height // 6, window=self.account_label)
 
         self.email_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=30, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 1, self.canvas_height // 2.7, window=self.email_entry)
+        self.canvas.create_window(self.canvas_width // 1.1, self.canvas_height // 3.3, window=self.email_entry)
 
         self.pass_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=30, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 1, self.canvas_height // 2, window=self.pass_entry)
+        self.canvas.create_window(self.canvas_width // 1.1, self.canvas_height // 2.5, window=self.pass_entry)
 
         self.confirm_pass_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=30, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 1, self.canvas_height // 1.57, window=self.confirm_pass_entry)
+        self.canvas.create_window(self.canvas_width // 1.1, self.canvas_height // 2, window=self.confirm_pass_entry)
+
+        self.terms_condition_lb = tk.Label(self, text='Terms & Conditions', font=('Monospac821 BT', 11), fg='#00FF00', bg='#0c0c0c')
+        self.canvas.create_window(self.canvas_width // 1.3, self.canvas_height // 1.75, window=self.terms_condition_lb)
+        terms_condition_txt = """
+Terms and Conditions: Login, Security, and User Compliance
+
+1. Login Credentials: Users are required to create and maintain login credentials (username and password) that are unique and confidential. Sharing of login information is strictly prohibited.
+
+2. Security Measures: The platform employs industry-standard security measures to protect user information and identity. Users are responsible for maintaining the security of their accounts and promptly reporting any unauthorized access or suspicious activity.
+
+3. Protection of Information: All user data, including personal and sensitive information, is handled in accordance with our privacy policy. We are committed to safeguarding user privacy and will not disclose or sell user information to third parties without consent, except as required by law.
+
+4. Identity Verification: Users must provide accurate and truthful information during registration and identity verification processes. Falsifying identity or providing misleading information is grounds for account suspension or termination.
+
+5. Compliance with Rules: By accessing the platform, users agree to abide by all applicable laws, regulations, and the terms outlined in this agreement. Any violation of these terms may result in disciplinary action, including account suspension or legal consequences.
+
+6. Responsibility for Actions: Users are solely responsible for their actions while using the platform. This includes adherence to community guidelines, respect for intellectual property rights, and refraining from engaging in illegal or harmful activities.
+
+7. Updates and Modifications: These terms and conditions may be updated or modified periodically to reflect changes in regulations or improvements to the platform. Users will be notified of any significant changes, and continued use of the platform constitutes acceptance of the updated terms.
+
+8. Termination of Access: We reserve the right to terminate or suspend user access to the platform at any time, without prior notice, for violations of these terms or any other reason deemed necessary to protect the integrity of the platform.
+
+By logging into the platform, users acknowledge that they have read, understood, and agreed to abide by these terms and conditions regarding login, security, and user compliance.
+"""
+
+        self.text_box_terms_conditions = scrolledtext.ScrolledText(self, wrap=tk.WORD, width=35, height=5)
+        self.text_box_terms_conditions.insert(tk.END, terms_condition_txt)
+        self.text_box_terms_conditions.tag_configure("color", foreground="#00FF00", background='#0c0c0c') 
+        self.text_box_terms_conditions.tag_add("color", "2.0", "end")
+        self.canvas.create_window(self.canvas_width // 1.1, self.canvas_height // 1.45, window=self.text_box_terms_conditions)
 
         self.image_pil3 = Image.open(self.image_path)
         self.resize_image3 = self.image_pil3.resize((420,370))
         self.image3 = ImageTk.PhotoImage(self.resize_image3)
-        self.canvas.create_image(self.canvas_width // 1, self.canvas_height // 1.7, image=self.image3)
+        self.canvas.create_image(self.canvas_width // 1.1, self.canvas_height // 1.94, image=self.image3)
 
         self.create_btn = tk.Button(self, text='Create Account', font=('Montserrat', 14, 'bold'), 
                                    fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command=self.onclick_create)
-        self.canvas.create_window(self.canvas_width // 1 , self.canvas_height // 1.3, window=self.create_btn)
+        self.canvas.create_window(self.canvas_width // 1.1 , self.canvas_height // 1.06, window=self.create_btn)
 
         self.back_image_path = 'back.png'
         self.pil_image_back_image = Image.open(self.back_image_path)
         self.resize_back_image = self.pil_image_back_image.resize((30,30))
         self.image_back_image = ImageTk.PhotoImage(self.resize_back_image)
         self.back_button = tk.Label(self, image=self.image_back_image, bg='#0c0c0c', cursor='hand2')
-        self.canvas.create_window(self.canvas_width // 0.74, self.canvas_height // 10, window=self.back_button)
+        self.canvas.create_window(self.canvas_width // 0.62, self.canvas_height // 10, window=self.back_button)
 
         self.fname_entry.insert(0, 'First Name')
         self.mname_entry.insert(0, 'MI (Optional)')
@@ -376,6 +407,11 @@ class SignUpPage(tk.Frame):
             return
         self.back_button.config(bg='#323232')
 
+    def confirm_email_otp(self):
+        pop_up_frame = tk.Toplevel(self)
+        pop_up_frame.title('Confirm Email')
+
+
     def city_entry_enter(self, event):
         if self.city_entry.get() == 'City':
             self.city_entry.delete(0, tk.END)
@@ -437,16 +473,6 @@ class SignUpPage(tk.Frame):
         if self.mname_entry.get() == '':
             self.mname_entry.delete(0, tk.END)
             self.mname_entry.insert(0, 'MI (Optional)')
-
-    # def mname_entry_enter(self, event):
-    #     if self.mname_entry.get() == 'Middle Name':
-    #         self.mname_entry.delete(0, tk.END)
-    #         self.mname_entry.insert(0, '')
-    
-    # def mname_entry_leave(self, event):
-    #     if self.mname_entry.get() == '':
-    #         self.mname_entry.delete(0, tk.END)
-    #         self.mname_entry.insert(0, 'Middle Name')
 
     def lname_entry_leave(self, event):
         if self.lname_entry.get() == '':
