@@ -4,7 +4,7 @@ from PIL import Image, ImageTk
 from tkinter import messagebox
 import db_handler
 import models
-
+import re
 
 class FadingLabel(tk.Label):
     def __init__(self, master=None, **kwargs):
@@ -259,7 +259,13 @@ class SignUpPage(tk.Frame):
         self.confirm_pass_entry.insert(0, 'Confirm Password')
 
         self.bind()
-
+    def validate_input(self, text):
+        regex = "^[A-Za-z ]+$"
+        if re.match(regex, text):
+            return True
+        else:
+            return False
+        
     def onclick_create(self):
         fname = self.fname_entry.get()
         mname = self.mname_entry.get()
@@ -271,16 +277,19 @@ class SignUpPage(tk.Frame):
         password = self.pass_entry.get()
         confirm_password = self.confirm_pass_entry.get()
 
-        if fname == 'First Name'or lname == 'Last Name' or contact == 'Contact Number' or city == 'City' or province == 'Province' or email == 'Email' or password == 'Password' or confirm_password == 'Confirm Password':
+        if fname == 'First Name'or lname == 'Last Name' or contact == 'Contact Number' or city == 'City' or province == 'Province' or email == 'Email' or confirm_password == 'Confirm Password':
             messagebox.showerror('Error', 'Please fill all the fields')
             return
-        elif password!= confirm_password:
+        elif password == 'Password' or password == 'password':
+            messagebox.showerror('Error', 'Password must be unique')
+            return
+        elif password != confirm_password:
             messagebox.showerror('Error', 'Passwords do not match')
             return
-        elif not fname.isalpha():
+        elif not self.validate_input(fname):
             messagebox.showerror('Error', 'First Name must contain only letters')
             return
-        elif not mname.isalpha():
+        elif not self.validate_input(mname):
             if mname == 'MI (Optional)':
                 mname = 'N/A'
             elif not mname.strip():
@@ -288,16 +297,16 @@ class SignUpPage(tk.Frame):
             else:
                 messagebox.showerror('Error', 'Middle Name must contain only letters')
                 return
-        elif not lname.isalpha():
+        elif not self.validate_input(lname):
             messagebox.showerror('Error', 'Last Name must contain only letters')
             return
         elif not contact.replace("+", "").replace(" ", "").isdigit():
             messagebox.showerror('Error', 'Contact Number must contain only numbers')
             return
-        elif not city.isalpha():
+        elif not self.validate_input(city):
             messagebox.showerror('Error', 'City must contain only letters')
             return
-        elif not province.isalpha():
+        elif not self.validate_input(province):
             messagebox.showerror('Error', 'Province must contain only letters')
             return
         if len(contact) != 13:
