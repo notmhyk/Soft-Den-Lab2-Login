@@ -8,3 +8,4 @@ class Profiles:
         self.province = ''
         self.email = ''
         self.password = ''
+        self.image_data = None

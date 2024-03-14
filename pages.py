@@ -1,11 +1,14 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import scrolledtext
+from tkinter import filedialog, simpledialog
 from PIL import Image, ImageTk
 from tkinter import messagebox
+import sqlite3
 import db_handler
 import models
 import re
+import io
 
 class FadingLabel(tk.Label):
     def __init__(self, master=None, **kwargs):
@@ -282,6 +285,25 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.back_button = tk.Label(self, image=self.image_back_image, bg='#0c0c0c', cursor='hand2')
         self.canvas.create_window(self.canvas_width // 0.62, self.canvas_height // 10, window=self.back_button)
 
+        self.image_label = tk.Label(self, text='No Image Uploaded', font=('Monospac821 BT', 12), fg='#00FF00', bg='#0c0c0c')
+        self.canvas.create_window(self.canvas_width // 0.69, self.canvas_height // 2.4, window=self.image_label)
+
+        self.crop_btn = tk.Button(self, text='Crop', font=('Montserrat', 14, 'bold'), 
+                                   fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command=self.start_crop)
+        self.canvas.create_window(self.canvas_width // 0.69 , self.canvas_height // 1.4, window=self.crop_btn)
+
+        self.upload_btn = tk.Button(self, text='Upload Image', font=('Montserrat', 14, 'bold'), 
+                                   fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command=self.upload_image)
+        self.canvas.create_window(self.canvas_width // 0.69 , self.canvas_height // 1.2, window=self.upload_btn)
+        
+        self.retrieve_image = tk.Button(self, text='Retrieve Image', font=('Montserrat', 14, 'bold'), 
+                                   fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command=self.retrieve_from_database)
+        self.canvas.create_window(self.canvas_width // 0.69, self.canvas_height // 1.0, window=self.retrieve_image)
+
+
+        self.image_data_list = []
+        self.current_index = -1  
+
         self.fname_entry.insert(0, 'First Name')
         self.mname_entry.insert(0, 'MI (Optional)')
         self.lname_entry.insert(0, 'Last Name')
@@ -292,7 +314,68 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.pass_entry.insert(0, 'Password')
         self.confirm_pass_entry.insert(0, 'Confirm Password')
 
+        self.crop_canvas = None
+        self.crop_rect = None
+        self.crop_start = None
+
         self.bind()
+
+    def upload_image(self):
+        file_path = filedialog.askopenfilename()
+        if file_path:
+            self.original_image = Image.open(file_path)
+            self.original_image = self.original_image.resize((200, 200), Image.LANCZOS)
+            self.photo = ImageTk.PhotoImage(self.original_image)
+            self.image_label.config(image=self.photo)
+            self.image_label.image = self.photo
+    def start_crop(self):
+        if not hasattr(self, 'original_image'):
+            messagebox.showerror("Error", "Please upload an image first.")
+            return
+
+        self.top = tk.Toplevel(self)
+        self.top.title("Crop Image")
+
+        self.crop_canvas = tk.Canvas(self.top, width=self.original_image.width, height=self.original_image.height)
+        self.crop_canvas.create_image(0, 0, anchor=tk.NW, image=self.photo)
+        self.crop_canvas.pack()
+        self.crop_canvas.bind("<Button-1>", self.on_crop_start)
+        self.crop_canvas.bind("<B1-Motion>", self.on_crop_drag)
+        self.crop_canvas.bind("<ButtonRelease-1>", self.on_crop_end)
+
+        self.crop_rect = None
+        self.crop_start = None
+
+    def on_crop_start(self, event):
+        self.crop_start = (event.x, event.y)
+        if self.crop_rect:
+            self.crop_canvas.delete(self.crop_rect)
+
+    def on_crop_drag(self, event):
+        if self.crop_rect:
+            self.crop_canvas.delete(self.crop_rect)
+        x0, y0 = self.crop_start
+        x1, y1 = event.x, event.y
+        self.crop_rect = self.crop_canvas.create_rectangle(x0, y0, x1, y1, outline="red")
+
+    def on_crop_end(self, event):
+        if self.crop_rect:
+            self.crop_canvas.delete(self.crop_rect)
+        x0, y0 = self.crop_start
+        x1, y1 = event.x, event.y
+
+        if x0 > x1:
+            x0, x1 = x1, x0
+        if y0 > y1:
+            y0, y1 = y1, y0
+        self.cropped_image = self.original_image.crop((x0, y0, x1, y1))
+        self.cropped_image = self.cropped_image.resize((200, 200), Image.LANCZOS)
+        self.crop_photo = ImageTk.PhotoImage(self.cropped_image)
+        self.image_label.config(image=self.crop_photo)
+        self.image_label.image = self.crop_photo
+        self.crop_canvas.destroy()
+        self.top.destroy()
+
     def validate_input(self, text):
         regex = "^[A-Za-z ]+$"
         if re.match(regex, text):
@@ -359,11 +442,47 @@ By logging into the platform, users acknowledge that they have read, understood,
         profile.province = province
         profile.email = email
         profile.password = password
-        db_conn = db_handler.DBHandler()
-        db_conn.insert_account(profile)
-        db_conn.close()
-        messagebox.showinfo('Successfully Created', f'Welcome {fname}')
-        self.parent.change_frame('LoginPage')
+
+        if hasattr(self, 'cropped_image'):
+            with io.BytesIO() as buffer:
+                self.cropped_image.save(buffer, format='PNG')
+                image_data_cropped = buffer.getvalue()
+                profile.image_data = image_data_cropped
+                db_conn = db_handler.DBHandler()            
+                db_conn.insert_account(profile)
+                db_conn.close()
+                messagebox.showinfo('Successfully Created', f'Welcome {fname}')
+                self.parent.change_frame('LoginPage')
+        elif hasattr(self, 'original_image'):
+            with io.BytesIO() as buffer:
+                self.original_image.save(buffer, format='PNG')
+                image_data_orig = buffer.getvalue()
+                profile.image_data = image_data_orig
+                db_conn = db_handler.DBHandler()            
+                db_conn.insert_account(profile)
+                db_conn.close()
+                messagebox.showinfo('Successfully Created', f'Welcome {fname}')
+                self.parent.change_frame('LoginPage')
+        else:
+            messagebox.showerror("Error", "No Image to save.")
+
+            
+    def retrieve_from_database(self):
+        self.conn = sqlite3.connect('database.db')
+        self.cursor = self.conn.cursor()
+        self.cursor.execute("SELECT image FROM profiles")
+        self.image_data_list = self.cursor.fetchall()
+        if self.image_data_list:
+            self.current_index = (self.current_index + 1) % len(self.image_data_list)
+            image_data = self.image_data_list[self.current_index][0]
+            image = Image.open(io.BytesIO(image_data))
+            image = image.resize((200, 200), Image.LANCZOS)
+            photo = ImageTk.PhotoImage(image)
+            self.image_label.config(image=photo)
+            self.image_label.image = photo
+            print("Image retrieved from database.")
+        else:
+            print("No images found in the database.")
 
     def bind(self):
         self.fname_entry.bind('<FocusIn>', self.fname_entry_enter)
