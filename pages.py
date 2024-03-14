@@ -180,7 +180,7 @@ class SignUpPage(tk.Frame):
         self.show_object()
         
     def show_object(self):
-
+        self.chk_box_var = tk.BooleanVar()
         self.image_path = 'border.png'
         
         self.image_pil = Image.open(self.image_path)
@@ -225,16 +225,16 @@ class SignUpPage(tk.Frame):
         self.canvas.create_window(self.canvas_width // 1.5, self.canvas_height // 6, window=self.account_label)
 
         self.email_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=30, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 1.1, self.canvas_height // 3.3, window=self.email_entry)
+        self.canvas.create_window(self.canvas_width // 1.1, self.canvas_height // 3.7, window=self.email_entry)
 
         self.pass_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=30, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 1.1, self.canvas_height // 2.5, window=self.pass_entry)
+        self.canvas.create_window(self.canvas_width // 1.1, self.canvas_height // 2.7, window=self.pass_entry)
 
         self.confirm_pass_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=30, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 1.1, self.canvas_height // 2, window=self.confirm_pass_entry)
+        self.canvas.create_window(self.canvas_width // 1.1, self.canvas_height // 2.2, window=self.confirm_pass_entry)
 
         self.terms_condition_lb = tk.Label(self, text='Terms & Conditions', font=('Monospac821 BT', 11), fg='#00FF00', bg='#0c0c0c')
-        self.canvas.create_window(self.canvas_width // 1.3, self.canvas_height // 1.75, window=self.terms_condition_lb)
+        self.canvas.create_window(self.canvas_width // 1.3, self.canvas_height // 1.95, window=self.terms_condition_lb)
         terms_condition_txt = """
 Terms and Conditions: Login, Security, and User Compliance
 
@@ -257,14 +257,17 @@ Terms and Conditions: Login, Security, and User Compliance
 By logging into the platform, users acknowledge that they have read, understood, and agreed to abide by these terms and conditions regarding login, security, and user compliance.
 """
 
-        self.text_box_terms_conditions = scrolledtext.ScrolledText(self, wrap=tk.WORD, width=35, height=5)
+        self.text_box_terms_conditions = scrolledtext.ScrolledText(self, wrap=tk.WORD, width=35, height=6)
         self.text_box_terms_conditions.insert(tk.END, terms_condition_txt)
         self.text_box_terms_conditions.tag_configure("color", foreground="#00FF00", background='#0c0c0c') 
         self.text_box_terms_conditions.tag_add("color", "2.0", "end")
-        self.canvas.create_window(self.canvas_width // 1.1, self.canvas_height // 1.45, window=self.text_box_terms_conditions)
+        self.canvas.create_window(self.canvas_width // 1.1, self.canvas_height // 1.58, window=self.text_box_terms_conditions)
+
+        self.chk_btn = tk.Checkbutton(self, text='Agree to terms', variable=self.chk_box_var, fg='#00FF00', bg='#0c0c0c', font=('Monospac821 BT', 11))
+        self.canvas.create_window(self.canvas_width // 1.1, self.canvas_height // 1.28, window=self.chk_btn)
 
         self.image_pil3 = Image.open(self.image_path)
-        self.resize_image3 = self.image_pil3.resize((420,370))
+        self.resize_image3 = self.image_pil3.resize((420,380))
         self.image3 = ImageTk.PhotoImage(self.resize_image3)
         self.canvas.create_image(self.canvas_width // 1.1, self.canvas_height // 1.94, image=self.image3)
 
