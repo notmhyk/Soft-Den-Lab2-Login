@@ -264,6 +264,7 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.text_box_terms_conditions.insert(tk.END, terms_condition_txt)
         self.text_box_terms_conditions.tag_configure("color", foreground="#00FF00", background='#0c0c0c') 
         self.text_box_terms_conditions.tag_add("color", "2.0", "end")
+        self.text_box_terms_conditions.config(state=tk.DISABLED)
         self.canvas.create_window(self.canvas_width // 1.1, self.canvas_height // 1.58, window=self.text_box_terms_conditions)
 
         self.chk_btn = tk.Checkbutton(self, text='Agree to terms', variable=self.chk_box_var, fg='#00FF00', bg='#0c0c0c', font=('Monospac821 BT', 11))
@@ -296,10 +297,7 @@ By logging into the platform, users acknowledge that they have read, understood,
                                    fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command=self.upload_image)
         self.canvas.create_window(self.canvas_width // 0.69 , self.canvas_height // 1.2, window=self.upload_btn)
         
-        self.retrieve_image = tk.Button(self, text='Retrieve Image', font=('Montserrat', 14, 'bold'), 
-                                   fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command=self.retrieve_from_database)
-        self.canvas.create_window(self.canvas_width // 0.69, self.canvas_height // 1.0, window=self.retrieve_image)
-
+        
 
         self.image_data_list = []
         self.current_index = -1  
@@ -432,6 +430,10 @@ By logging into the platform, users acknowledge that they have read, understood,
         elif len(password) <= 5:
             messagebox.showerror('Error', 'Password must be at least 6 characters')
             return
+
+        if self.chk_box_var.get() == 0:
+            messagebox.showwarning('Terms & Conditions', 'Terms & condition is unchecked')
+            return
             
         profile = models.Profiles()
         profile.fname = fname
@@ -466,23 +468,6 @@ By logging into the platform, users acknowledge that they have read, understood,
         else:
             messagebox.showerror("Error", "No Image to save.")
 
-            
-    def retrieve_from_database(self):
-        self.conn = sqlite3.connect('database.db')
-        self.cursor = self.conn.cursor()
-        self.cursor.execute("SELECT image FROM profiles")
-        self.image_data_list = self.cursor.fetchall()
-        if self.image_data_list:
-            self.current_index = (self.current_index + 1) % len(self.image_data_list)
-            image_data = self.image_data_list[self.current_index][0]
-            image = Image.open(io.BytesIO(image_data))
-            image = image.resize((200, 200), Image.LANCZOS)
-            photo = ImageTk.PhotoImage(image)
-            self.image_label.config(image=photo)
-            self.image_label.image = photo
-            print("Image retrieved from database.")
-        else:
-            print("No images found in the database.")
 
     def bind(self):
         self.fname_entry.bind('<FocusIn>', self.fname_entry_enter)
