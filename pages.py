@@ -396,13 +396,6 @@ By logging into the platform, users acknowledge that they have read, understood,
         password = self.pass_entry.get()
         confirm_password = self.confirm_pass_entry.get()
 
-        if not hasattr(self, 'original_image'):
-            messagebox.showerror("Error", "Please upload an image first.")
-            return
-        elif '@gmail.com' not in email:
-            messagebox.showerror("Error", "Please enter a valid Gmail address.")
-            return
-
         if fname == 'First Name'or lname == 'Last Name' or contact == 'Contact Number' or city == 'City' or province == 'Province' or email == 'Email' or confirm_password == 'Confirm Password':
             messagebox.showerror('Error', 'Please fill all the fields')
             return
@@ -444,6 +437,13 @@ By logging into the platform, users acknowledge that they have read, understood,
 
         if self.chk_box_var.get() == 0:
             messagebox.showwarning('Terms & Conditions', 'Terms & condition is unchecked')
+            return
+        
+        if not hasattr(self, 'original_image'):
+            messagebox.showerror("Error", "Please upload an image first.")
+            return
+        elif '@gmail.com' not in email:
+            messagebox.showerror("Error", "Please enter a valid Gmail address.")
             return
 
 
@@ -569,11 +569,17 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.resend_lb = tk.Label(self.pop_up_frame, text="", font=('Monospac821 BT', 10, 'bold'), fg='#00FF00', bg='#0c0c0c')
         self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 1.1, window=self.resend_lb)
 
+        def validate_input(text):
+            regex = "^[A-Za-z ]+$"
+            if re.match(regex, text):
+                return True
+            else:
+                return False
         
         def upload_data_to_db():
+            mname = self.mname_entry.get()
             profile = models.Profiles()
             profile.fname = fname
-            profile.mname = mname
             profile.lname = lname
             profile.contact = contact
             profile.city = city
@@ -583,6 +589,15 @@ By logging into the platform, users acknowledge that they have read, understood,
 
             entered_otp = self.otp_entry.get()
 
+            if not validate_input(mname):
+                if mname == 'MI (Optional)':
+                    mname = 'N/A'
+                elif not mname.strip():
+                    mname = 'N/A'
+                else:
+                    messagebox.showerror('Error', 'Middle Name must contain only letters')
+                    return
+            profile.mname = mname
             if entered_otp != otp_code:
                 messagebox.showerror('Error', 'OTP is wrong')
                 return
