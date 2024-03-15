@@ -5,7 +5,10 @@ from tkinter import filedialog, simpledialog
 from PIL import Image, ImageTk
 from tkinter import messagebox
 from random import randint
-import sqlite3
+from email.message import EmailMessage
+import ssl
+import smtplib
+# import sqlite3
 import db_handler
 import models
 import re
@@ -393,48 +396,48 @@ By logging into the platform, users acknowledge that they have read, understood,
         password = self.pass_entry.get()
         confirm_password = self.confirm_pass_entry.get()
 
-        # if fname == 'First Name'or lname == 'Last Name' or contact == 'Contact Number' or city == 'City' or province == 'Province' or email == 'Email' or confirm_password == 'Confirm Password':
-        #     messagebox.showerror('Error', 'Please fill all the fields')
-        #     return
-        # elif password == 'Password' or password == 'password':
-        #     messagebox.showerror('Error', 'Password must be unique')
-        #     return
-        # elif password != confirm_password:
-        #     messagebox.showerror('Error', 'Passwords do not match')
-        #     return
-        # elif not self.validate_input(fname):
-        #     messagebox.showerror('Error', 'First Name must contain only letters')
-        #     return
-        # elif not self.validate_input(mname):
-        #     if mname == 'MI (Optional)':
-        #         mname = 'N/A'
-        #     elif not mname.strip():
-        #         mname = 'N/A'
-        #     else:
-        #         messagebox.showerror('Error', 'Middle Name must contain only letters')
-        #         return
-        # elif not self.validate_input(lname):
-        #     messagebox.showerror('Error', 'Last Name must contain only letters')
-        #     return
-        # elif not contact.replace("+", "").replace(" ", "").isdigit():
-        #     messagebox.showerror('Error', 'Contact Number must contain only numbers')
-        #     return
-        # elif not self.validate_input(city):
-        #     messagebox.showerror('Error', 'City must contain only letters')
-        #     return
-        # elif not self.validate_input(province):
-        #     messagebox.showerror('Error', 'Province must contain only letters')
-        #     return
-        # if len(contact) != 13:
-        #     messagebox.showerror('Error', 'Contact Number must be 13 digits')
-        #     return
-        # elif len(password) <= 5:
-        #     messagebox.showerror('Error', 'Password must be at least 6 characters')
-        #     return
+        if fname == 'First Name'or lname == 'Last Name' or contact == 'Contact Number' or city == 'City' or province == 'Province' or email == 'Email' or confirm_password == 'Confirm Password':
+            messagebox.showerror('Error', 'Please fill all the fields')
+            return
+        elif password == 'Password' or password == 'password':
+            messagebox.showerror('Error', 'Password must be unique')
+            return
+        elif password != confirm_password:
+            messagebox.showerror('Error', 'Passwords do not match')
+            return
+        elif not self.validate_input(fname):
+            messagebox.showerror('Error', 'First Name must contain only letters')
+            return
+        elif not self.validate_input(mname):
+            if mname == 'MI (Optional)':
+                mname = 'N/A'
+            elif not mname.strip():
+                mname = 'N/A'
+            else:
+                messagebox.showerror('Error', 'Middle Name must contain only letters')
+                return
+        elif not self.validate_input(lname):
+            messagebox.showerror('Error', 'Last Name must contain only letters')
+            return
+        elif not contact.replace("+", "").replace(" ", "").isdigit():
+            messagebox.showerror('Error', 'Contact Number must contain only numbers')
+            return
+        elif not self.validate_input(city):
+            messagebox.showerror('Error', 'City must contain only letters')
+            return
+        elif not self.validate_input(province):
+            messagebox.showerror('Error', 'Province must contain only letters')
+            return
+        if len(contact) != 13:
+            messagebox.showerror('Error', 'Contact Number must be 13 digits')
+            return
+        elif len(password) <= 5:
+            messagebox.showerror('Error', 'Password must be at least 6 characters')
+            return
 
-        # if self.chk_box_var.get() == 0:
-        #     messagebox.showwarning('Terms & Conditions', 'Terms & condition is unchecked')
-        #     return
+        if self.chk_box_var.get() == 0:
+            messagebox.showwarning('Terms & Conditions', 'Terms & condition is unchecked')
+            return
         
         self.confirm_email_otp()
             
@@ -537,10 +540,37 @@ By logging into the platform, users acknowledge that they have read, understood,
         
         otp_code = ''
 
-        for i in range(6):
-            otp_code += str(randint(0,9))
-        print(otp_code)
+        def send_email():
+            emailSender = 'receiver.not404@gmail.com'
+            emailPassword = 'yhwb ijon zrxw hpzj'
+            emailReceiver = email
 
+            subject = 'One-Time-Password'
+            body = f"""
+            Your One Time Password (OTP) for account verification is: {otp_code}. 
+            Please use this OTP to complete your registration process. Do not share this OTP with anyone for security reasons
+            """
+
+            em = EmailMessage()
+
+            em['From'] = emailSender
+            em['To'] = emailReceiver
+            em['Subject'] = subject
+            em.set_content(body)
+
+
+            context = ssl.create_default_context()
+
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+                smtp.login(emailSender, emailPassword)
+                smtp.sendmail(emailSender, emailReceiver, em.as_string())
+        def generate_otp():
+            nonlocal otp_code
+            otp_code = ''.join(str(randint(0, 9)) for _ in range(6))
+            send_email()
+        generate_otp()
+
+        # send_email()
         labels = []
         for i in range(10):
             for j in range(20):
@@ -559,7 +589,8 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.otp_entry = tk.Entry(self.pop_up_frame, font=('Monospac821 BT', 14), width=20, justify='center', fg='white', bg='#323232')
         self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 1.4, window=self.otp_entry)
 
-        remaining_time = 30
+        remaining_time = 60
+
         self.resend_lb = tk.Label(self.pop_up_frame, text="", font=('Monospac821 BT', 10, 'bold'), fg='#00FF00', bg='#0c0c0c')
         self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 1.1, window=self.resend_lb)
 
@@ -575,9 +606,9 @@ By logging into the platform, users acknowledge that they have read, understood,
             profile.email = email
             profile.password = password
 
-            otp = self.otp_entry.get()
+            entered_otp = self.otp_entry.get()
 
-            if otp_code != otp:
+            if entered_otp != otp_code:
                 messagebox.showerror('Error', 'OTP is wrong')
                 return
 
@@ -590,6 +621,7 @@ By logging into the platform, users acknowledge that they have read, understood,
                     db_conn.insert_account(profile)
                     db_conn.close()
                     messagebox.showinfo('Successfully Created', f'Welcome {fname}')
+                    self.pop_up_frame.destroy()
                     self.parent.change_frame('LoginPage')
             elif hasattr(self, 'original_image'):
                 with io.BytesIO() as buffer:
@@ -617,7 +649,6 @@ By logging into the platform, users acknowledge that they have read, understood,
                 self.resend_lb.config(text="Time's up!")
                 self.confirm_otp_btn.config(text='Resend OTP')
                 self.confirm_otp_btn.config(command=repeat_clock)
-                otp_code = ''
             else:
                 self.resend_lb.config(text=f"Resend in: {remaining_time} seconds")
                 remaining_time -= 1
@@ -625,17 +656,11 @@ By logging into the platform, users acknowledge that they have read, understood,
 
         def repeat_clock():
             nonlocal remaining_time
-            nonlocal otp_code
-            for i in range(6):
-                otp_code += str(randint(0,9))
-            print(otp_code)
-            remaining_time = 30
+            remaining_time = 60
             update_label()
+            generate_otp()
 
         update_label()
-
-        
-        
 
     def city_entry_enter(self, event):
         if self.city_entry.get() == 'City':
