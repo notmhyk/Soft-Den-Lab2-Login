@@ -192,7 +192,7 @@ class SignUpPage(tk.Frame):
         self.canvas.create_image(self.canvas_width // 3, self.canvas_height // 2.6, image=self.image)
         
         self.label = tk.Label(self, text='Create Account', font=('Montserrat', 25, 'bold'), fg='#00FF00', bg='#0c0c0c')
-        self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 15, window=self.label)
+        self.canvas.create_window(self.canvas_width // 1.15, self.canvas_height // 15, window=self.label)
 
         self.personal_label = tk.Label(self, text='Personal Info', font=('Monospac821 BT', 11), fg='#00FF00', bg='#0c0c0c')
         self.canvas.create_window(self.canvas_width // 7, self.canvas_height // 6, window=self.personal_label)
@@ -392,81 +392,83 @@ By logging into the platform, users acknowledge that they have read, understood,
         password = self.pass_entry.get()
         confirm_password = self.confirm_pass_entry.get()
 
-        if fname == 'First Name'or lname == 'Last Name' or contact == 'Contact Number' or city == 'City' or province == 'Province' or email == 'Email' or confirm_password == 'Confirm Password':
-            messagebox.showerror('Error', 'Please fill all the fields')
-            return
-        elif password == 'Password' or password == 'password':
-            messagebox.showerror('Error', 'Password must be unique')
-            return
-        elif password != confirm_password:
-            messagebox.showerror('Error', 'Passwords do not match')
-            return
-        elif not self.validate_input(fname):
-            messagebox.showerror('Error', 'First Name must contain only letters')
-            return
-        elif not self.validate_input(mname):
-            if mname == 'MI (Optional)':
-                mname = 'N/A'
-            elif not mname.strip():
-                mname = 'N/A'
-            else:
-                messagebox.showerror('Error', 'Middle Name must contain only letters')
-                return
-        elif not self.validate_input(lname):
-            messagebox.showerror('Error', 'Last Name must contain only letters')
-            return
-        elif not contact.replace("+", "").replace(" ", "").isdigit():
-            messagebox.showerror('Error', 'Contact Number must contain only numbers')
-            return
-        elif not self.validate_input(city):
-            messagebox.showerror('Error', 'City must contain only letters')
-            return
-        elif not self.validate_input(province):
-            messagebox.showerror('Error', 'Province must contain only letters')
-            return
-        if len(contact) != 13:
-            messagebox.showerror('Error', 'Contact Number must be 13 digits')
-            return
-        elif len(password) <= 5:
-            messagebox.showerror('Error', 'Password must be at least 6 characters')
-            return
+        # if fname == 'First Name'or lname == 'Last Name' or contact == 'Contact Number' or city == 'City' or province == 'Province' or email == 'Email' or confirm_password == 'Confirm Password':
+        #     messagebox.showerror('Error', 'Please fill all the fields')
+        #     return
+        # elif password == 'Password' or password == 'password':
+        #     messagebox.showerror('Error', 'Password must be unique')
+        #     return
+        # elif password != confirm_password:
+        #     messagebox.showerror('Error', 'Passwords do not match')
+        #     return
+        # elif not self.validate_input(fname):
+        #     messagebox.showerror('Error', 'First Name must contain only letters')
+        #     return
+        # elif not self.validate_input(mname):
+        #     if mname == 'MI (Optional)':
+        #         mname = 'N/A'
+        #     elif not mname.strip():
+        #         mname = 'N/A'
+        #     else:
+        #         messagebox.showerror('Error', 'Middle Name must contain only letters')
+        #         return
+        # elif not self.validate_input(lname):
+        #     messagebox.showerror('Error', 'Last Name must contain only letters')
+        #     return
+        # elif not contact.replace("+", "").replace(" ", "").isdigit():
+        #     messagebox.showerror('Error', 'Contact Number must contain only numbers')
+        #     return
+        # elif not self.validate_input(city):
+        #     messagebox.showerror('Error', 'City must contain only letters')
+        #     return
+        # elif not self.validate_input(province):
+        #     messagebox.showerror('Error', 'Province must contain only letters')
+        #     return
+        # if len(contact) != 13:
+        #     messagebox.showerror('Error', 'Contact Number must be 13 digits')
+        #     return
+        # elif len(password) <= 5:
+        #     messagebox.showerror('Error', 'Password must be at least 6 characters')
+        #     return
 
-        if self.chk_box_var.get() == 0:
-            messagebox.showwarning('Terms & Conditions', 'Terms & condition is unchecked')
-            return
+        # if self.chk_box_var.get() == 0:
+        #     messagebox.showwarning('Terms & Conditions', 'Terms & condition is unchecked')
+        #     return
+        
+        self.confirm_email_otp()
             
-        profile = models.Profiles()
-        profile.fname = fname
-        profile.mname = mname
-        profile.lname = lname
-        profile.contact = contact
-        profile.city = city
-        profile.province = province
-        profile.email = email
-        profile.password = password
+        # profile = models.Profiles()
+        # profile.fname = fname
+        # profile.mname = mname
+        # profile.lname = lname
+        # profile.contact = contact
+        # profile.city = city
+        # profile.province = province
+        # profile.email = email
+        # profile.password = password
 
-        if hasattr(self, 'cropped_image'):
-            with io.BytesIO() as buffer:
-                self.cropped_image.save(buffer, format='PNG')
-                image_data_cropped = buffer.getvalue()
-                profile.image_data = image_data_cropped
-                db_conn = db_handler.DBHandler()            
-                db_conn.insert_account(profile)
-                db_conn.close()
-                messagebox.showinfo('Successfully Created', f'Welcome {fname}')
-                self.parent.change_frame('LoginPage')
-        elif hasattr(self, 'original_image'):
-            with io.BytesIO() as buffer:
-                self.original_image.save(buffer, format='PNG')
-                image_data_orig = buffer.getvalue()
-                profile.image_data = image_data_orig
-                db_conn = db_handler.DBHandler()            
-                db_conn.insert_account(profile)
-                db_conn.close()
-                messagebox.showinfo('Successfully Created', f'Welcome {fname}')
-                self.parent.change_frame('LoginPage')
-        else:
-            messagebox.showerror("Error", "No Image to save.")
+        # if hasattr(self, 'cropped_image'):
+        #     with io.BytesIO() as buffer:
+        #         self.cropped_image.save(buffer, format='PNG')
+        #         image_data_cropped = buffer.getvalue()
+        #         profile.image_data = image_data_cropped
+        #         db_conn = db_handler.DBHandler()            
+        #         db_conn.insert_account(profile)
+        #         db_conn.close()
+        #         messagebox.showinfo('Successfully Created', f'Welcome {fname}')
+        #         self.parent.change_frame('LoginPage')
+        # elif hasattr(self, 'original_image'):
+        #     with io.BytesIO() as buffer:
+        #         self.original_image.save(buffer, format='PNG')
+        #         image_data_orig = buffer.getvalue()
+        #         profile.image_data = image_data_orig
+        #         db_conn = db_handler.DBHandler()            
+        #         db_conn.insert_account(profile)
+        #         db_conn.close()
+        #         messagebox.showinfo('Successfully Created', f'Welcome {fname}')
+        #         self.parent.change_frame('LoginPage')
+        # else:
+        #     messagebox.showerror("Error", "No Image to save.")
 
 
     def bind(self):
@@ -515,8 +517,74 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.back_button.config(bg='#323232')
 
     def confirm_email_otp(self):
-        pop_up_frame = tk.Toplevel(self)
-        pop_up_frame.title('Confirm Email')
+        self.pop_up_frame = tk.Toplevel(self)
+        self.pop_up_frame.title('Confirm Email')
+        self.pop_up_frame.geometry('600x530')
+        self.pop_up_frame.config(background='black')
+        self.pop_up_frame.resizable(width=False, height=False)
+
+        labels = []
+        for i in range(10):
+            for j in range(20):
+                label = FadingLabel(self.pop_up_frame, text="", width=10, height=4, background="#121212")
+                label.grid(row=i, column=j, padx=2, pady=2, ipadx=1, ipady=1)
+                labels.append(label)
+
+        self.canvas_width = 300
+        self.canvas_height = 200
+        self.canvas = tk.Canvas(self.pop_up_frame, width=self.canvas_width, height=self.canvas_height, bg='#0c0c0c', highlightbackground='#00FF00', highlightthickness=2)
+        self.canvas.grid(row=1, column=1, rowspan=5, columnspan=5, sticky='nsew')
+
+        self.label = tk.Label(self.pop_up_frame, text='OTP has been sent to your Email', font=('Monospac821 BT', 15, 'bold'), fg='#00FF00', bg='#0c0c0c')
+        self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 2.9, window=self.label)
+
+        self.otp_entry = tk.Entry(self.pop_up_frame, font=('Monospac821 BT', 14), width=20, justify='center', fg='white', bg='#323232')
+        self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 1.4, window=self.otp_entry)
+
+        fname = self.fname_entry.get()
+        mname = self.mname_entry.get()
+        lname = self.lname_entry.get()
+        contact = self.contact_entry.get()
+        city = self.city_entry.get()
+        province = self.province_entry.get()
+        email = self.email_entry.get()
+        password = self.pass_entry.get()
+
+        def upload_data_to_db():
+            profile = models.Profiles()
+            profile.fname = fname
+            profile.mname = mname
+            profile.lname = lname
+            profile.contact = contact
+            profile.city = city
+            profile.province = province
+            profile.email = email
+            profile.password = password
+
+            if hasattr(self, 'cropped_image'):
+                with io.BytesIO() as buffer:
+                    self.cropped_image.save(buffer, format='PNG')
+                    image_data_cropped = buffer.getvalue()
+                    profile.image_data = image_data_cropped
+                    db_conn = db_handler.DBHandler()            
+                    db_conn.insert_account(profile)
+                    db_conn.close()
+                    messagebox.showinfo('Successfully Created', f'Welcome {fname}')
+                    self.parent.change_frame('LoginPage')
+            elif hasattr(self, 'original_image'):
+                with io.BytesIO() as buffer:
+                    self.original_image.save(buffer, format='PNG')
+                    image_data_orig = buffer.getvalue()
+                    profile.image_data = image_data_orig
+                    db_conn = db_handler.DBHandler()            
+                    db_conn.insert_account(profile)
+                    db_conn.close()
+                    messagebox.showinfo('Successfully Created', f'Welcome {fname}')
+                    self.parent.change_frame('LoginPage')
+            else:
+                messagebox.showerror("Error", "No Image to save.")
+
+        self.confirm_otp_btn = tk.Button(self, text='Confirm OTP', command=upload_data_to_db)
 
 
     def city_entry_enter(self, event):
