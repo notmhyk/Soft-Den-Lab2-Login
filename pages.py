@@ -4,6 +4,7 @@ from tkinter import scrolledtext
 from tkinter import filedialog, simpledialog
 from PIL import Image, ImageTk
 from tkinter import messagebox
+from random import randint
 import sqlite3
 import db_handler
 import models
@@ -520,8 +521,25 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.pop_up_frame = tk.Toplevel(self)
         self.pop_up_frame.title('Confirm Email')
         self.pop_up_frame.geometry('600x530')
+        self.pop_up_frame.grab_set()
+        self.pop_up_frame.focus_set()
         self.pop_up_frame.config(background='black')
         self.pop_up_frame.resizable(width=False, height=False)
+
+        fname = self.fname_entry.get()
+        mname = self.mname_entry.get()
+        lname = self.lname_entry.get()
+        contact = self.contact_entry.get()
+        city = self.city_entry.get()
+        province = self.province_entry.get()
+        email = self.email_entry.get()
+        password = self.pass_entry.get()
+        
+        otp_code = ''
+
+        for i in range(6):
+            otp_code += str(randint(0,9))
+        print(otp_code)
 
         labels = []
         for i in range(10):
@@ -541,15 +559,11 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.otp_entry = tk.Entry(self.pop_up_frame, font=('Monospac821 BT', 14), width=20, justify='center', fg='white', bg='#323232')
         self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 1.4, window=self.otp_entry)
 
-        fname = self.fname_entry.get()
-        mname = self.mname_entry.get()
-        lname = self.lname_entry.get()
-        contact = self.contact_entry.get()
-        city = self.city_entry.get()
-        province = self.province_entry.get()
-        email = self.email_entry.get()
-        password = self.pass_entry.get()
+        remaining_time = 30
+        self.resend_lb = tk.Label(self.pop_up_frame, text="", font=('Monospac821 BT', 10, 'bold'), fg='#00FF00', bg='#0c0c0c')
+        self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 1.1, window=self.resend_lb)
 
+        
         def upload_data_to_db():
             profile = models.Profiles()
             profile.fname = fname
@@ -560,6 +574,12 @@ By logging into the platform, users acknowledge that they have read, understood,
             profile.province = province
             profile.email = email
             profile.password = password
+
+            otp = self.otp_entry.get()
+
+            if otp_code != otp:
+                messagebox.showerror('Error', 'OTP is wrong')
+                return
 
             if hasattr(self, 'cropped_image'):
                 with io.BytesIO() as buffer:
@@ -584,8 +604,38 @@ By logging into the platform, users acknowledge that they have read, understood,
             else:
                 messagebox.showerror("Error", "No Image to save.")
 
-        self.confirm_otp_btn = tk.Button(self, text='Confirm OTP', command=upload_data_to_db)
+        self.confirm_otp_btn = tk.Button(self.pop_up_frame, text='Confirm OTP', font=('Montserrat', 14, 'bold'), 
+                                fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command=upload_data_to_db)
+        self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 0.9, window=self.confirm_otp_btn)
 
+        def update_label():
+            nonlocal remaining_time
+            nonlocal otp_code
+            self.confirm_otp_btn.config(text='Confirm OTP')
+            self.confirm_otp_btn.config(command=upload_data_to_db)
+            if remaining_time <= 0:
+                self.resend_lb.config(text="Time's up!")
+                self.confirm_otp_btn.config(text='Resend OTP')
+                self.confirm_otp_btn.config(command=repeat_clock)
+                otp_code = ''
+            else:
+                self.resend_lb.config(text=f"Resend in: {remaining_time} seconds")
+                remaining_time -= 1
+                self.pop_up_frame.after(1000, update_label)
+
+        def repeat_clock():
+            nonlocal remaining_time
+            nonlocal otp_code
+            for i in range(6):
+                otp_code += str(randint(0,9))
+            print(otp_code)
+            remaining_time = 30
+            update_label()
+
+        update_label()
+
+        
+        
 
     def city_entry_enter(self, event):
         if self.city_entry.get() == 'City':
