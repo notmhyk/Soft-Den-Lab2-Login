@@ -396,6 +396,13 @@ By logging into the platform, users acknowledge that they have read, understood,
         password = self.pass_entry.get()
         confirm_password = self.confirm_pass_entry.get()
 
+        if not hasattr(self, 'original_image'):
+            messagebox.showerror("Error", "Please upload an image first.")
+            return
+        elif '@gmail.com' not in email:
+            messagebox.showerror("Error", "Please enter a valid Gmail address.")
+            return
+
         if fname == 'First Name'or lname == 'Last Name' or contact == 'Contact Number' or city == 'City' or province == 'Province' or email == 'Email' or confirm_password == 'Confirm Password':
             messagebox.showerror('Error', 'Please fill all the fields')
             return
@@ -438,42 +445,9 @@ By logging into the platform, users acknowledge that they have read, understood,
         if self.chk_box_var.get() == 0:
             messagebox.showwarning('Terms & Conditions', 'Terms & condition is unchecked')
             return
-        
+
+
         self.confirm_email_otp()
-            
-        # profile = models.Profiles()
-        # profile.fname = fname
-        # profile.mname = mname
-        # profile.lname = lname
-        # profile.contact = contact
-        # profile.city = city
-        # profile.province = province
-        # profile.email = email
-        # profile.password = password
-
-        # if hasattr(self, 'cropped_image'):
-        #     with io.BytesIO() as buffer:
-        #         self.cropped_image.save(buffer, format='PNG')
-        #         image_data_cropped = buffer.getvalue()
-        #         profile.image_data = image_data_cropped
-        #         db_conn = db_handler.DBHandler()            
-        #         db_conn.insert_account(profile)
-        #         db_conn.close()
-        #         messagebox.showinfo('Successfully Created', f'Welcome {fname}')
-        #         self.parent.change_frame('LoginPage')
-        # elif hasattr(self, 'original_image'):
-        #     with io.BytesIO() as buffer:
-        #         self.original_image.save(buffer, format='PNG')
-        #         image_data_orig = buffer.getvalue()
-        #         profile.image_data = image_data_orig
-        #         db_conn = db_handler.DBHandler()            
-        #         db_conn.insert_account(profile)
-        #         db_conn.close()
-        #         messagebox.showinfo('Successfully Created', f'Welcome {fname}')
-        #         self.parent.change_frame('LoginPage')
-        # else:
-        #     messagebox.showerror("Error", "No Image to save.")
-
 
     def bind(self):
         self.fname_entry.bind('<FocusIn>', self.fname_entry_enter)
@@ -528,6 +502,7 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.pop_up_frame.focus_set()
         self.pop_up_frame.config(background='black')
         self.pop_up_frame.resizable(width=False, height=False)
+        
 
         fname = self.fname_entry.get()
         mname = self.mname_entry.get()
@@ -570,7 +545,7 @@ By logging into the platform, users acknowledge that they have read, understood,
             send_email()
         generate_otp()
 
-        # send_email()
+
         labels = []
         for i in range(10):
             for j in range(20):
@@ -621,7 +596,6 @@ By logging into the platform, users acknowledge that they have read, understood,
                     db_conn.insert_account(profile)
                     db_conn.close()
                     messagebox.showinfo('Successfully Created', f'Welcome {fname}')
-                    self.pop_up_frame.destroy()
                     self.parent.change_frame('LoginPage')
             elif hasattr(self, 'original_image'):
                 with io.BytesIO() as buffer:
@@ -635,7 +609,9 @@ By logging into the platform, users acknowledge that they have read, understood,
                     self.parent.change_frame('LoginPage')
             else:
                 messagebox.showerror("Error", "No Image to save.")
-
+                return
+            self.pop_up_frame.destroy()
+            self.image_label.cget('text') == 'No Image Uploaded'
         self.confirm_otp_btn = tk.Button(self.pop_up_frame, text='Confirm OTP', font=('Montserrat', 14, 'bold'), 
                                 fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command=upload_data_to_db)
         self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 0.9, window=self.confirm_otp_btn)
