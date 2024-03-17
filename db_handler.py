@@ -38,18 +38,6 @@ class DBHandler:
         else:
             return False
 
-    def admin_login(self, email, password):
-        query = f'SELECT * FROM {self.admin_table} WHERE username =? AND password =?'
-        values = (email, password)
-        self.cursor.execute(query, values)
-        # self.cursor.execute(query, (email, password))
-        result = self.cursor.fetchone()
-
-        if result:
-            return True
-        else:
-            return False
-
     def close(self):
         self.conn.close()
     

@@ -6,6 +6,7 @@ from PIL import Image, ImageTk
 from tkinter import messagebox
 from random import randint
 from email.message import EmailMessage
+from captcha.image import ImageCaptcha
 import ssl
 import smtplib
 # import sqlite3
@@ -13,6 +14,9 @@ import db_handler
 import models
 import re
 import io
+import os
+import string
+import random
 
 class FadingLabel(tk.Label):
     def __init__(self, master=None, **kwargs):
@@ -323,7 +327,7 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.bind()
 
     def upload_image(self):
-        file_path = filedialog.askopenfilename()
+        file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.gif")])
         if file_path:
             self.original_image = Image.open(file_path)
             self.original_image = self.original_image.resize((200, 200), Image.LANCZOS)
@@ -559,15 +563,58 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.canvas.grid(row=1, column=1, rowspan=5, columnspan=5, sticky='nsew')
 
         self.label = tk.Label(self.pop_up_frame, text='OTP has been sent to your Email', font=('Monospac821 BT', 15, 'bold'), fg='#00FF00', bg='#0c0c0c')
-        self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 2.9, window=self.label)
+        self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 5, window=self.label)
 
         self.otp_entry = tk.Entry(self.pop_up_frame, font=('Monospac821 BT', 14), width=20, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 1.4, window=self.otp_entry)
+        self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 2, window=self.otp_entry)
 
-        remaining_time = 60
+        remaining_time = 180
 
         self.resend_lb = tk.Label(self.pop_up_frame, text="", font=('Monospac821 BT', 10, 'bold'), fg='#00FF00', bg='#0c0c0c')
-        self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 1.1, window=self.resend_lb)
+        self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 1.5, window=self.resend_lb)
+
+        def  generate_captcha(text_length = 6, folder = 'captcha'):
+            characters = string.ascii_letters + string.digits
+            captcha_text = ''.join(random.choices(characters, k=text_length))
+            captcha = ImageCaptcha()
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+            captcha_image_file = os.path.join(folder, f'{captcha_text}.png')
+            captcha.write(captcha_text, captcha_image_file)
+            return captcha_text, captcha_image_file
+        
+        def check_captcha(user_input, captcha_text):
+            return user_input == captcha_text
+
+        def delete_captcha(captcha_image_file):
+            os.remove(captcha_image_file)
+            print("CAPTCHA image deleted successfully!")
+
+        def generate_new_captcha():
+            nonlocal captcha_text, captcha_image_file
+
+            if os.path.exists(captcha_image_file):
+                os.remove(captcha_image_file)
+                print("Previous CAPTCHA image deleted successfully!")
+
+            captcha_text, captcha_image_file = generate_captcha()
+            new_captcha_image = Image.open(captcha_image_file)
+            new_captcha_image_tk = ImageTk.PhotoImage(new_captcha_image)
+            captcha_label.configure(image=new_captcha_image_tk)
+            captcha_label.image = new_captcha_image_tk
+
+        captcha_text, captcha_image_file = generate_captcha()
+        captcha_image = Image.open(captcha_image_file)
+        captcha_image_tk = ImageTk.PhotoImage(captcha_image)
+        captcha_label = tk.Label(self.pop_up_frame, image=captcha_image_tk)
+        captcha_label.image = captcha_image_tk
+        self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 0.85, window=captcha_label)
+
+        generate_button = tk.Button(self.pop_up_frame, text="Generate New CAPTCHA", command=generate_new_captcha)
+        self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 0.68, window=generate_button)
+
+        captcha_entry = tk.Entry(self.pop_up_frame, font=('Monospac821 BT', 14), width=20, justify='center', fg='white', bg='#323232')
+        self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 0.6, window=captcha_entry)
 
         def validate_input(text):
             regex = "^[A-Za-z ]+$"
@@ -601,6 +648,12 @@ By logging into the platform, users acknowledge that they have read, understood,
             if entered_otp != otp_code:
                 messagebox.showerror('Error', 'OTP is wrong')
                 return
+            
+            entered_captcha = captcha_entry.get()
+            if not check_captcha(entered_captcha, captcha_text):
+                messagebox.showerror('Error', 'Incorrect CAPTCHA')
+                return
+            delete_captcha(captcha_image_file)
 
             if hasattr(self, 'cropped_image'):
                 with io.BytesIO() as buffer:
@@ -628,8 +681,8 @@ By logging into the platform, users acknowledge that they have read, understood,
             self.pop_up_frame.destroy()
             self.image_label.cget('text') == 'No Image Uploaded'
         self.confirm_otp_btn = tk.Button(self.pop_up_frame, text='Confirm OTP', font=('Montserrat', 14, 'bold'), 
-                                fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command=upload_data_to_db)
-        self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 0.9, window=self.confirm_otp_btn)
+                                fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command='upload_data_to_db')
+        self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 1.2, window=self.confirm_otp_btn)
 
         def update_label():
             nonlocal remaining_time
@@ -647,7 +700,7 @@ By logging into the platform, users acknowledge that they have read, understood,
 
         def repeat_clock():
             nonlocal remaining_time
-            remaining_time = 60
+            remaining_time = 180
             update_label()
             generate_otp()
 
@@ -762,12 +815,6 @@ class LandingPage(tk.Frame):
         self.master.title('Landing Page')
         self.label = tk.Label(self, text='LANDING PAGE')
         self.label.grid(row=0, column=0)
-        
 
-class AdminPage(tk.Frame):
-    def __init__(self, master):
-        tk.Frame.__init__(self, master)
-        self.master = master
-        self.master.title('Admin Page')
-        self.label = tk.Label(self, text='ADMIN PAGE')
-        self.label.grid(row=0, column=0)
+
+

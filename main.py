@@ -11,8 +11,7 @@ class MainWindow(tk.Tk):
         self.frames['LoginPage'] = pages.LoginPage(self)
         self.frames['SignUpPage'] = pages.SignUpPage(self)
         self.frames['LandingPage'] = pages.LandingPage(self)
-        self.frames['AdminPage'] = pages.AdminPage(self)
-        self.change_frame('LoginPage')
+        self.change_frame('SignUpPage')
 
     def change_frame(self, name):
         for frame in self.frames.values():
@@ -23,8 +22,6 @@ class MainWindow(tk.Tk):
             self.frames[name] = pages.SignUpPage(self)
         elif name == 'LandingPage':
             self.frames[name] = pages.LandingPage(self)
-        elif name == 'AdminPage':
-            self.frames[name] = pages.AdminPage(self)
         self.frames[name].grid(row=0, column=0)
         
 
