@@ -69,6 +69,10 @@ class LoginPage(tk.Frame):
                 label = FadingLabel(self, text="", width=10, height=4, background="#121212")
                 label.grid(row=i, column=j, padx=2, pady=2, ipadx=1, ipady=1)
                 labels.append(label)
+                label.bind('<Button-1>', self.focusSet)
+
+    def focusSet(self, event):
+        self.focus_set()
 
     def show_canvas(self):
         self.canvas_width = 600
@@ -167,9 +171,9 @@ class LoginPage(tk.Frame):
 
     def canvas_clicked(self, event):
         if not self.entry_pass.get() or not self.entry_email.get():
-            self.canvas.focus_set()
+            self.focus_set()
         else:
-            self.canvas.focus_set()
+            self.focus_set()
 
 class SignUpPage(tk.Frame):
     def __init__(self, master):
@@ -331,6 +335,7 @@ By logging into the platform, users acknowledge that they have read, understood,
 
         self.top = tk.Toplevel(self)
         self.top.title("Crop Image")
+        self.top.resizable(False, False)
 
         self.crop_canvas = tk.Canvas(self.top, width=self.original_image.width, height=self.original_image.height)
         self.crop_canvas.create_image(0, 0, anchor=tk.NW, image=self.photo)
