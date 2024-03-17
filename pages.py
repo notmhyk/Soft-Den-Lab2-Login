@@ -294,7 +294,7 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.back_button = tk.Label(self, image=self.image_back_image, bg='#0c0c0c', cursor='hand2')
         self.canvas.create_window(self.canvas_width // 0.62, self.canvas_height // 10, window=self.back_button)
 
-        self.image_label = tk.Label(self, text='No Image Uploaded', font=('Monospac821 BT', 12), fg='#00FF00', bg='#0c0c0c')
+        self.image_label = tk.Label(self, text='No Image Uploaded', font=('Monospac821 BT', 12), fg='#00FF00', bg='#0c0c0c', cursor='hand2')
         self.canvas.create_window(self.canvas_width // 0.69, self.canvas_height // 2.4, window=self.image_label)
 
         self.crop_btn = tk.Button(self, text='Crop', font=('Montserrat', 14, 'bold'), 
@@ -326,7 +326,7 @@ By logging into the platform, users acknowledge that they have read, understood,
 
         self.bind()
 
-    def upload_image(self):
+    def upload_image(self, event=None):
         file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.gif")])
         if file_path:
             self.original_image = Image.open(file_path)
@@ -474,6 +474,7 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.province_entry.bind('<FocusIn>', self.province_entry_enter)
         self.province_entry.bind('<FocusOut>', self.province_entry_leave)
         self.back_button.bind('<Button-1>', self.onclick_back)
+        self.image_label.bind('<Button-1>', self.upload_image)
 
     def onclick_back(self, event):
         fname = self.fname_entry.get()
@@ -610,7 +611,8 @@ By logging into the platform, users acknowledge that they have read, understood,
         captcha_label.image = captcha_image_tk
         self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 0.85, window=captcha_label)
 
-        generate_button = tk.Button(self.pop_up_frame, text="Generate New CAPTCHA", command=generate_new_captcha)
+        generate_button = tk.Button(self.pop_up_frame, text="Generate New CAPTCHA", font=('Montserrat', 8, 'bold'), 
+                                fg='#00FF00', bg='#0c0c0c', width=20, cursor='hand2', command=generate_new_captcha)
         self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 0.68, window=generate_button)
 
         captcha_entry = tk.Entry(self.pop_up_frame, font=('Monospac821 BT', 14), width=20, justify='center', fg='white', bg='#323232')
@@ -705,6 +707,18 @@ By logging into the platform, users acknowledge that they have read, understood,
             generate_otp()
 
         update_label()
+
+        def on_window_destroy(event):
+            captcha_folder = 'captcha'
+            for file_name in os.listdir(captcha_folder):
+                file_path = os.path.join(captcha_folder, file_name)
+                try:
+                    if os.path.isfile(file_path):
+                        os.unlink(file_path)
+                        print(f"Deleted: {file_path}")
+                except Exception as e:
+                    print(f"Error deleting {file_path}: {e}")
+        self.pop_up_frame.bind("<Destroy>", on_window_destroy)
 
     def city_entry_enter(self, event):
         if self.city_entry.get() == 'City':
