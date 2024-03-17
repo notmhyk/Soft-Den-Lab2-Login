@@ -175,15 +175,15 @@ class SignUpPage(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         self.parent = master
-        
+        master.minsize(width=1062, height=638)
         self.config(background='black')
         self.create_labels()
         self.show_canvas()
         
     def create_labels(self):
         labels = []
-        for i in range(10):
-            for j in range(20):
+        for i in range(11):
+            for j in range(19):
                 label = FadingLabel(self, text="", width=10, height=4, background="#121212")
                 label.grid(row=i, column=j, padx=2, pady=2, ipadx=1, ipady=1)
                 labels.append(label)
@@ -192,65 +192,57 @@ class SignUpPage(tk.Frame):
         self.canvas_width = 600
         self.canvas_height = 500
         self.canvas = tk.Canvas(self, width=self.canvas_width, height=self.canvas_height, bg='#0c0c0c', highlightbackground='#00FF00', highlightthickness=2)
-        self.canvas.grid(row=1, column=2, rowspan=7, columnspan=12, sticky='nsew')
+        self.canvas.grid(row=1, column=2, rowspan=9, columnspan=15, sticky='nsew')
+        for i in range(11):
+            self.grid_rowconfigure(i, weight=1)
+        for j in range(19):  
+            self.grid_columnconfigure(j, weight=1)
         self.show_object()
         
     def show_object(self):
         self.chk_box_var = tk.BooleanVar()
-        self.image_path = 'border.png'
         
-        self.image_pil = Image.open(self.image_path)
-        self.resize_image = self.image_pil.resize((330,220))
-        self.image = ImageTk.PhotoImage(self.resize_image)
-        self.canvas.create_image(self.canvas_width // 3, self.canvas_height // 2.6, image=self.image)
-        
-        self.label = tk.Label(self, text='Create Account', font=('Montserrat', 25, 'bold'), fg='#00FF00', bg='#0c0c0c')
-        self.canvas.create_window(self.canvas_width // 1.15, self.canvas_height // 15, window=self.label)
+        self.label = tk.Label(self.canvas, text='Create Account', font=('Montserrat', 25, 'bold'), fg='#00FF00', bg='#0c0c0c')
+        self.label.place(relx=0.5, rely=0.02, anchor='n')
 
         self.personal_label = tk.Label(self, text='Personal Info', font=('Monospac821 BT', 11), fg='#00FF00', bg='#0c0c0c')
-        self.canvas.create_window(self.canvas_width // 7, self.canvas_height // 6, window=self.personal_label)
+        self.personal_label.place(relx=0.15, rely=0.21, anchor='w')
 
         self.fname_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 3, self.canvas_height // 3.7, window=self.fname_entry)
-
+        self.fname_entry.place(relx=0.25, rely=0.28, anchor='center')
+        
         self.mname_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 3, self.canvas_height // 2.6, window=self.mname_entry)
+        self.mname_entry.place(relx=0.25, rely=0.36, anchor='center')
 
         self.lname_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 3, self.canvas_height // 2, window=self.lname_entry)
-        
-
-        self.image_pil2 = Image.open(self.image_path)
-        self.resize_image2 = self.image_pil2.resize((330,210))
-        self.image2 = ImageTk.PhotoImage(self.resize_image2)
-        self.canvas.create_image(self.canvas_width // 3, self.canvas_height // 1.2, image=self.image2)
+        self.lname_entry.place(relx=0.25, rely=0.44, anchor='center')
 
         self.other_label = tk.Label(self, text='Other Info', font=('Monospac821 BT', 11), fg='#00FF00', bg='#0c0c0c')
-        self.canvas.create_window(self.canvas_width // 7, self.canvas_height // 1.6, window=self.other_label)
+        self.other_label.place(relx=0.15, rely=0.54, anchor='w')
 
         self.contact_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 3, self.canvas_height // 1.4, window=self.contact_entry)
+        self.contact_entry.place(relx=0.25, rely=0.6, anchor='center')
 
         self.city_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 3, self.canvas_height // 1.2, window=self.city_entry)
+        self.city_entry.place(relx=0.25, rely=0.68, anchor='center')
 
         self.province_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 3, self.canvas_height // 1.05, window=self.province_entry)
+        self.province_entry.place(relx=0.25, rely=0.77, anchor='center')
 
         self.account_label = tk.Label(self, text='Account Info', font=('Monospac821 BT', 11), fg='#00FF00', bg='#0c0c0c')
-        self.canvas.create_window(self.canvas_width // 1.5, self.canvas_height // 6, window=self.account_label)
+        self.account_label.place(relx=0.37, rely=0.21, anchor='w')
 
         self.email_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=30, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 1.1, self.canvas_height // 3.7, window=self.email_entry)
+        self.email_entry.place(relx=0.505, rely=0.28, anchor='center')
 
         self.pass_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=30, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 1.1, self.canvas_height // 2.7, window=self.pass_entry)
+        self.pass_entry.place(relx=0.505, rely=0.36, anchor='center')
 
         self.confirm_pass_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=30, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 1.1, self.canvas_height // 2.2, window=self.confirm_pass_entry)
+        self.confirm_pass_entry.place(relx=0.505, rely=0.44, anchor='center')
 
         self.terms_condition_lb = tk.Label(self, text='Terms & Conditions', font=('Monospac821 BT', 11), fg='#00FF00', bg='#0c0c0c')
-        self.canvas.create_window(self.canvas_width // 1.3, self.canvas_height // 1.95, window=self.terms_condition_lb)
+        self.terms_condition_lb.place(relx=0.4, rely=0.48, anchor='w')
         terms_condition_txt = """
 Terms and Conditions: Login, Security, and User Compliance
 
@@ -278,40 +270,33 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.text_box_terms_conditions.tag_configure("color", foreground="#00FF00", background='#0c0c0c') 
         self.text_box_terms_conditions.tag_add("color", "2.0", "end")
         self.text_box_terms_conditions.config(state=tk.DISABLED)
-        self.canvas.create_window(self.canvas_width // 1.1, self.canvas_height // 1.58, window=self.text_box_terms_conditions)
+        self.text_box_terms_conditions.place(relx=0.505, rely=0.57, anchor='center')
 
-        self.chk_btn = tk.Checkbutton(self, text='Agree to terms', variable=self.chk_box_var, fg='#00FF00', bg='#0c0c0c', font=('Monospac821 BT', 11))
-        self.canvas.create_window(self.canvas_width // 1.1, self.canvas_height // 1.28, window=self.chk_btn)
-
-        self.image_pil3 = Image.open(self.image_path)
-        self.resize_image3 = self.image_pil3.resize((420,380))
-        self.image3 = ImageTk.PhotoImage(self.resize_image3)
-        self.canvas.create_image(self.canvas_width // 1.1, self.canvas_height // 1.94, image=self.image3)
+        self.chk_btn = tk.Checkbutton(self, text='Agree to terms', variable=self.chk_box_var, fg='#00FF00', bg='#0c0c0c', font=('Monospac821 BT', 10))
+        self.chk_btn.place(relx=0.505, rely=0.68, anchor='center')
 
         self.create_btn = tk.Button(self, text='Create Account', font=('Montserrat', 14, 'bold'), 
                                    fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command=self.onclick_create)
-        self.canvas.create_window(self.canvas_width // 1.1 , self.canvas_height // 1.06, window=self.create_btn)
+        self.create_btn.place(relx=0.505, rely=0.75, anchor='center')
 
         self.back_image_path = 'back.png'
         self.pil_image_back_image = Image.open(self.back_image_path)
         self.resize_back_image = self.pil_image_back_image.resize((30,30))
         self.image_back_image = ImageTk.PhotoImage(self.resize_back_image)
         self.back_button = tk.Label(self, image=self.image_back_image, bg='#0c0c0c', cursor='hand2')
-        self.canvas.create_window(self.canvas_width // 0.62, self.canvas_height // 10, window=self.back_button)
+        self.back_button.place(relx=0.85, rely=0.15, anchor='center')
 
         self.image_label = tk.Label(self, text='No Image Uploaded', font=('Monospac821 BT', 12), fg='#00FF00', bg='#0c0c0c', cursor='hand2')
-        self.canvas.create_window(self.canvas_width // 0.69, self.canvas_height // 2.4, window=self.image_label)
+        self.image_label.place(relx=0.67, rely=0.4, anchor='w')
 
         self.crop_btn = tk.Button(self, text='Crop', font=('Montserrat', 14, 'bold'), 
                                    fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command=self.start_crop)
-        self.canvas.create_window(self.canvas_width // 0.69 , self.canvas_height // 1.4, window=self.crop_btn)
+        self.crop_btn.place(relx=0.67, rely=0.6, anchor='w')
 
         self.upload_btn = tk.Button(self, text='Upload Image', font=('Montserrat', 14, 'bold'), 
                                    fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command=self.upload_image)
-        self.canvas.create_window(self.canvas_width // 0.69 , self.canvas_height // 1.2, window=self.upload_btn)
+        self.upload_btn.place(relx=0.67, rely=0.7, anchor='w')
         
-        
-
         self.image_data_list = []
         self.current_index = -1  
 
