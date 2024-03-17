@@ -57,14 +57,15 @@ class LoginPage(tk.Frame):
         super().__init__(master)
         self.parent = master
         self.config(background='black')
+        master.minsize(width=787, height=461)
 
         self.create_labels()
         self.show_canvas()
 
     def create_labels(self):
         labels = []
-        for i in range(10):
-            for j in range(20):
+        for i in range(11):
+            for j in range(19):
                 label = FadingLabel(self, text="", width=10, height=4, background="#121212")
                 label.grid(row=i, column=j, padx=2, pady=2, ipadx=1, ipady=1)
                 labels.append(label)
@@ -73,38 +74,40 @@ class LoginPage(tk.Frame):
         self.canvas_width = 600
         self.canvas_height = 500
         self.canvas = tk.Canvas(self, width=self.canvas_width, height=self.canvas_height, bg='#0c0c0c', 
-                                highlightbackground='#00FF00', highlightthickness=2)
-        self.canvas.grid(row=1, column=4, rowspan=7, columnspan=8, sticky='nsew')
+                                highlightbackground='#00FF00', highlightthickness=4)
+        self.canvas.grid(row=1, column=4, rowspan=9, columnspan=11, sticky='nsew')
+        self.canvas.config(highlightbackground='#00FF00')
+        for i in range(11):
+            self.grid_rowconfigure(i, weight=1)
+        for j in range(19):  
+            self.grid_columnconfigure(j, weight=1)
         self.show_object()
 
     def show_object(self):
-        
-        self.sign_in_lb = tk.Label(self, text="SIGN IN", font=("Montserrat", 30, "bold"),
-                                     fg='#00FF00', bg='#0c0c0c')
-        self.canvas.create_window(self.canvas_width // 1.75 , self.canvas_height // 6, window=self.sign_in_lb)
+        self.sign_in_lb = tk.Label(self, text="SIGN IN", font=("Montserrat", 40, "bold"),
+                                     fg='#00FF00', bg='#0c0c0c', highlightbackground='#00FF00')
+        self.sign_in_lb.place(relx=0.5, rely=0.2, anchor='center')
 
         self.entry_email = tk.Entry(self, font=('Monospac821 BT', 17), width=30, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 1.75 , self.canvas_height // 3, window=self.entry_email)
-
+        self.entry_email.place(relx=0.5, rely=0.35, anchor='center')
         self.entry_email.insert(0, 'Email')
         
 
         self.entry_pass = tk.Entry(self, font=('Monospac821 BT', 17), width=30, justify='center', fg='white', bg='#323232')
-        self.canvas.create_window(self.canvas_width // 1.75 , self.canvas_height // 2, window=self.entry_pass)
-
+        self.entry_pass.place(relx=0.5, rely=0.45, anchor='center')
         self.entry_pass.insert(0, 'Password')
 
         self.login_btn = tk.Button(self, text='LOGIN', font=('Montserrat', 17, 'bold'), 
                                    fg='#00FF00', bg='#0c0c0c', width=25, cursor='hand2', command=self.onclick_login)
-        self.canvas.create_window(self.canvas_width // 1.75 , self.canvas_height // 1.3, window=self.login_btn)
+        self.login_btn.place(relx=0.5, rely=0.59, anchor='center')
 
         self.forgot_pass_label = tk.Label(self, text='Forgot Password', font=('Monospac821 BT', 11, 'underline'), 
                                           bg='#0c0c0c', fg='white', cursor='hand2')
-        self.canvas.create_window(self.canvas_width // 3.4 , self.canvas_height // 1.6, window=self.forgot_pass_label)
+        self.forgot_pass_label.place(relx=0.4, rely=0.7, anchor='center')
 
         self.signup_label = tk.Label(self, text='SIGN-UP', font=('Monospac821 BT', 11), bg='#0c0c0c', fg='#00FF00', cursor='hand2')
-        self.canvas.create_window(self.canvas_width // 1.11 , self.canvas_height // 1.6, window=self.signup_label)
-
+        self.signup_label.place(relx=0.62, rely=0.7, anchor='center')
+        self.canvas.focus_set
         self.bind()
 
     def onclick_login(self):
@@ -120,10 +123,10 @@ class LoginPage(tk.Frame):
         
         if self.parent.db_handler.acc_login(email, password):
             self.parent.change_frame('LandingPage')
-        elif self.parent.db_handler.admin_login(email, password):
-            self.parent.change_frame('AdminPage')
+        
         else:
             messagebox.showerror("Invalid Login", "Invalid username or password")
+            return
         
 
     def bind(self):
@@ -141,30 +144,32 @@ class LoginPage(tk.Frame):
         if self.entry_email.get() == 'Email':
             self.entry_email.delete(0, tk.END)
             self.entry_email.insert(0, '')
-
+            
+        
     def entry_user_leave(self, event):
         if self.entry_email.get() == '':
             self.entry_email.delete(0, tk.END)
             self.entry_email.insert(0, 'Email')
+            
         
     def entry_pass_enter(self, event):
         if self.entry_pass.get() == 'Password':
             self.entry_pass.delete(0, tk.END)
             self.entry_pass.insert(0, '')
             self.entry_pass.config(show='*')
-    
+        
     def entry_pass_leave(self, event):
         if self.entry_pass.get() == '':
             self.entry_pass.delete(0, tk.END)
             self.entry_pass.insert(0, 'Password')
             self.entry_pass.config(show='')
+        
 
     def canvas_clicked(self, event):
         if not self.entry_pass.get() or not self.entry_email.get():
-            self.focus_set()
+            self.canvas.focus_set()
         else:
-            self.focus_set()
-        
+            self.canvas.focus_set()
 
 class SignUpPage(tk.Frame):
     def __init__(self, master):

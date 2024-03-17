@@ -22,9 +22,11 @@ class MainWindow(tk.Tk):
             self.frames[name] = pages.SignUpPage(self)
         elif name == 'LandingPage':
             self.frames[name] = pages.LandingPage(self)
-        self.frames[name].grid(row=0, column=0)
+        self.frames[name].grid(row=0, column=0, sticky='nsew')
         
 
 root = MainWindow()
 root.state('zoomed')
+root.grid_rowconfigure(0, weight=1)  
+root.grid_columnconfigure(0, weight=1)
 root.mainloop()
