@@ -426,20 +426,6 @@ By logging into the platform, users acknowledge that they have read, understood,
         if y0 > y1:
             y0, y1 = y1, y0
 
-        # if hasattr(self, 'filtered_image'):
-        #     image_to_crop = self.filtered_image
-        #     self.filtered_photo = image_to_crop.crop((x0, y0, x1, y1))
-        #     self.filtered_photo = self.filtered_photo.resize((200, 200), Image.LANCZOS)
-        #     self.filter_image = ImageTk.PhotoImage(self.filtered_photo)
-        #     self.image_label.config(image=self.filter_image)
-        #     self.image_label.image = self.filter_image
-        # else:
-        #     image_to_crop = self.original_image
-        #     self.cropped_image = image_to_crop.crop((x0, y0, x1, y1))
-        #     self.cropped_image = self.cropped_image.resize((200, 200), Image.LANCZOS)
-        #     self.crop_photo = ImageTk.PhotoImage(self.cropped_image)
-        #     self.image_label.config(image=self.crop_photo)
-        #     self.image_label.image = self.crop_photo
         if hasattr(self, 'filtered_image'):
             self.filtered_image = self.filtered_image.crop((x0, y0, x1, y1))
             self.filtered_image = self.filtered_image.resize((200, 200), Image.LANCZOS)
@@ -453,10 +439,6 @@ By logging into the platform, users acknowledge that they have read, understood,
             self.image_label.config(image=self.photo)
             self.image_label.image = self.photo
 
-        # self.crop_photo = ImageTk.PhotoImage(self.filtered_image if hasattr(self, 'filtered_image') else self.original_image)
-        # self.image_label.config(image=self.crop_photo)
-        # self.image_label.image = self.crop_photo
-        
         self.crop_canvas.destroy()
         self.top.destroy()
 
