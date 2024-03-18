@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import scrolledtext
 from tkinter import filedialog, simpledialog
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageOps, ImageEnhance, ImageFilter
 from tkinter import messagebox
 from random import randint
 from email.message import EmailMessage
@@ -181,6 +181,7 @@ class SignUpPage(tk.Frame):
         self.parent = master
         master.minsize(width=1062, height=638)
         self.config(background='black')
+        self.original_image = None
         self.create_labels()
         self.show_canvas()
         
@@ -202,7 +203,7 @@ class SignUpPage(tk.Frame):
         for j in range(19):  
             self.grid_columnconfigure(j, weight=1)
         self.show_object()
-        
+
     def show_object(self):
         self.chk_box_var = tk.BooleanVar()
         
@@ -290,7 +291,7 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.back_button = tk.Label(self, image=self.image_back_image, bg='#0c0c0c', cursor='hand2')
         self.back_button.place(relx=0.85, rely=0.15, anchor='center')
 
-        self.image_label = tk.Label(self, text='No Image Uploaded', font=('Monospac821 BT', 12), fg='#00FF00', bg='#0c0c0c', cursor='hand2')
+        self.image_label = tk.Label(self, text='No Image Uploaded', font=('Monospac821 BT', 12), fg='#00FF00', bg='#0c0c0c', cursor='hand2', image='')
         self.image_label.place(relx=0.67, rely=0.4, anchor='w')
 
         self.crop_btn = tk.Button(self, text='Crop', font=('Montserrat', 14, 'bold'), 
@@ -300,7 +301,16 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.upload_btn = tk.Button(self, text='Upload Image', font=('Montserrat', 14, 'bold'), 
                                    fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command=self.upload_image)
         self.upload_btn.place(relx=0.67, rely=0.7, anchor='w')
-        
+
+        self.filter_options = ["Select Filter","Original", "Grayscale", "Blur", "Sharpen",
+                              "Contour", "Edge Enhance", "Emboss", "Smooth", "Brightness", "Contrast"]
+        self.filter_var = tk.StringVar()
+        self.filter_var.set(self.filter_options[0])
+
+        self.filter_menu = tk.OptionMenu(self, self.filter_var, *self.filter_options, command=self.apply_filter)
+        self.filter_menu.config(bg='#0c0c0c', fg='#00FF00', font=('Monospac821 BT', 14), width=15, highlightbackground='#0c0c0c', highlightthickness=1)
+        self.filter_menu.place(relx=0.67, rely=0.8, anchor='w')
+
         self.image_data_list = []
         self.current_index = -1  
 
@@ -320,11 +330,53 @@ By logging into the platform, users acknowledge that they have read, understood,
 
         self.bind()
 
+    def apply_filter(self, filter_option):
+        if self.image_label.cget('image') is None:
+            messagebox.showerror("Error", "Please load an image first.")
+            return
+        if self.original_image is None:
+            messagebox.showerror("Error", "Please load an image first.")
+            return
+        try:
+            if filter_option == "Original":
+                self.filtered_image = self.original_image.copy()
+            else:
+                if filter_option == "Grayscale":
+                    self.filtered_image = self.original_image.convert("L")
+                elif filter_option == "Blur":
+                    self.filtered_image = self.original_image.filter(ImageFilter.BLUR)
+                elif filter_option == "Sharpen":
+                    self.filtered_image = self.original_image.filter(ImageFilter.SHARPEN)
+                elif filter_option == "Contour":
+                    self.filtered_image = self.original_image.filter(ImageFilter.CONTOUR)
+                elif filter_option == "Edge Enhance":
+                    self.filtered_image = self.original_image.filter(ImageFilter.EDGE_ENHANCE)
+                elif filter_option == "Emboss":
+                    self.filtered_image = self.original_image.filter(ImageFilter.EMBOSS)
+                elif filter_option == "Smooth":
+                    self.filtered_image = self.original_image.filter(ImageFilter.SMOOTH)
+                elif filter_option == "Brightness":
+                    enhancer = ImageEnhance.Brightness(self.original_image)
+                    self.filtered_image = enhancer.enhance(1.5)
+                elif filter_option == "Contrast":
+                    enhancer = ImageEnhance.Contrast(self.original_image)
+                    self.filtered_image = enhancer.enhance(1.5)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to apply filter: {e}")
+        if self.filtered_image is None:
+            messagebox.showerror("Error", "Failed to apply filter.")
+            return
+
+        self.photo = ImageTk.PhotoImage(self.filtered_image)
+        self.image_label.config(image=self.photo)
+        self.image_label.image = self.photo
+
     def upload_image(self, event=None):
         file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.gif")])
         if file_path:
             self.original_image = Image.open(file_path)
             self.original_image = self.original_image.resize((200, 200), Image.LANCZOS)
+            self.filtered_image = self.original_image.copy()
             self.photo = ImageTk.PhotoImage(self.original_image)
             self.image_label.config(image=self.photo)
             self.image_label.image = self.photo
@@ -336,9 +388,13 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.top = tk.Toplevel(self)
         self.top.title("Crop Image")
         self.top.resizable(False, False)
+        if hasattr(self, 'original_image'):
+            self.crop_canvas = tk.Canvas(self.top, width=self.original_image.width, height=self.original_image.height)
+            self.crop_canvas.create_image(0, 0, anchor=tk.NW, image=self.photo)
+        elif hasattr(self, 'filtered_image'):
+            self.crop_canvas = tk.Canvas(self.top, width=self.filtered_image.width, height=self.filtered_image.height)
+            self.crop_canvas.create_image(0, 0, anchor=tk.NW, image=self.photo)
 
-        self.crop_canvas = tk.Canvas(self.top, width=self.original_image.width, height=self.original_image.height)
-        self.crop_canvas.create_image(0, 0, anchor=tk.NW, image=self.photo)
         self.crop_canvas.pack()
         self.crop_canvas.bind("<Button-1>", self.on_crop_start)
         self.crop_canvas.bind("<B1-Motion>", self.on_crop_drag)
@@ -369,11 +425,38 @@ By logging into the platform, users acknowledge that they have read, understood,
             x0, x1 = x1, x0
         if y0 > y1:
             y0, y1 = y1, y0
-        self.cropped_image = self.original_image.crop((x0, y0, x1, y1))
-        self.cropped_image = self.cropped_image.resize((200, 200), Image.LANCZOS)
-        self.crop_photo = ImageTk.PhotoImage(self.cropped_image)
-        self.image_label.config(image=self.crop_photo)
-        self.image_label.image = self.crop_photo
+
+        # if hasattr(self, 'filtered_image'):
+        #     image_to_crop = self.filtered_image
+        #     self.filtered_photo = image_to_crop.crop((x0, y0, x1, y1))
+        #     self.filtered_photo = self.filtered_photo.resize((200, 200), Image.LANCZOS)
+        #     self.filter_image = ImageTk.PhotoImage(self.filtered_photo)
+        #     self.image_label.config(image=self.filter_image)
+        #     self.image_label.image = self.filter_image
+        # else:
+        #     image_to_crop = self.original_image
+        #     self.cropped_image = image_to_crop.crop((x0, y0, x1, y1))
+        #     self.cropped_image = self.cropped_image.resize((200, 200), Image.LANCZOS)
+        #     self.crop_photo = ImageTk.PhotoImage(self.cropped_image)
+        #     self.image_label.config(image=self.crop_photo)
+        #     self.image_label.image = self.crop_photo
+        if hasattr(self, 'filtered_image'):
+            self.filtered_image = self.filtered_image.crop((x0, y0, x1, y1))
+            self.filtered_image = self.filtered_image.resize((200, 200), Image.LANCZOS)
+            self.photo = ImageTk.PhotoImage(self.filtered_image)
+            self.image_label.config(image=self.photo)
+            self.image_label.image = self.photo
+        else:
+            self.original_image = self.original_image.crop((x0, y0, x1, y1))
+            self.original_image = self.original_image.resize((200, 200), Image.LANCZOS)
+            self.photo = ImageTk.PhotoImage(self.original_image)
+            self.image_label.config(image=self.photo)
+            self.image_label.image = self.photo
+
+        # self.crop_photo = ImageTk.PhotoImage(self.filtered_image if hasattr(self, 'filtered_image') else self.original_image)
+        # self.image_label.config(image=self.crop_photo)
+        # self.image_label.image = self.crop_photo
+        
         self.crop_canvas.destroy()
         self.top.destroy()
 
@@ -653,28 +736,24 @@ By logging into the platform, users acknowledge that they have read, understood,
             delete_captcha(captcha_image_file)
 
             if hasattr(self, 'cropped_image'):
-                with io.BytesIO() as buffer:
-                    self.cropped_image.save(buffer, format='PNG')
-                    image_data_cropped = buffer.getvalue()
-                    profile.image_data = image_data_cropped
-                    db_conn = db_handler.DBHandler()            
-                    db_conn.insert_account(profile)
-                    db_conn.close()
-                    messagebox.showinfo('Successfully Created', f'Welcome {fname}')
-                    self.parent.change_frame('LoginPage')
+                image_to_save = self.cropped_image
+            elif hasattr(self, 'filtered_image'):
+                image_to_save = self.filtered_image
             elif hasattr(self, 'original_image'):
-                with io.BytesIO() as buffer:
-                    self.original_image.save(buffer, format='PNG')
-                    image_data_orig = buffer.getvalue()
-                    profile.image_data = image_data_orig
-                    db_conn = db_handler.DBHandler()            
-                    db_conn.insert_account(profile)
-                    db_conn.close()
-                    messagebox.showinfo('Successfully Created', f'Welcome {fname}')
-                    self.parent.change_frame('LoginPage')
+                image_to_save = self.original_image
             else:
                 messagebox.showerror("Error", "No Image to save.")
                 return
+
+            with io.BytesIO() as buffer:
+                image_to_save.save(buffer, format='PNG')
+                image_data = buffer.getvalue()
+                profile.image_data = image_data
+                db_conn = db_handler.DBHandler()            
+                db_conn.insert_account(profile)
+                db_conn.close()
+                messagebox.showinfo('Successfully Created', f'Welcome {profile.fname}')
+                self.parent.change_frame('LoginPage')
             self.pop_up_frame.destroy()
             self.image_label.cget('text') == 'No Image Uploaded'
         self.confirm_otp_btn = tk.Button(self.pop_up_frame, text='Confirm OTP', font=('Montserrat', 14, 'bold'), 
