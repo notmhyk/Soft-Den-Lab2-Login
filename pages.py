@@ -399,7 +399,7 @@ By logging into the platform, users acknowledge that they have read, understood,
             self.photo = ImageTk.PhotoImage(self.original_image)
             self.image_label.config(image=self.photo)
             self.image_label.image = self.photo
-            
+
     def start_crop(self):
         if self.original_image is None:
             messagebox.showerror("Error", "Please load an image first.")
@@ -950,6 +950,7 @@ class ForgotPassword(tk.Frame):
                                 highlightbackground='#00FF00', highlightthickness=4)
         self.canvas.grid(row=1, column=4, rowspan=9, columnspan=11, sticky='nsew')
         self.canvas.config(highlightbackground='#00FF00')
+        self.canvas.bind('<Button-1>', self.canvas_focus)
         for i in range(11):
             self.grid_rowconfigure(i, weight=1)
         for j in range(19):  
@@ -970,11 +971,27 @@ class ForgotPassword(tk.Frame):
         self.forgot_pass_lb.place(relx=0.5, rely=0.2, anchor='center')
         self.entry_email = tk.Entry(self, font=('Monospac821 BT', 17), width=30, justify='center', fg='white', bg='#323232')
         self.entry_email.place(relx=0.5, rely=0.4, anchor='center')
+        self.entry_email.insert(0, 'Email')
+    
+        self.entry_email.bind('<FocusIn>', self.entry_user_enter)
+        self.entry_email.bind('<FocusOut>', self.entry_user_leave)
 
         self.confirm_email_btn = tk.Button(self, text='Search Account', font=('Montserrat', 17, 'bold'), 
                                    fg='#00FF00', bg='#0c0c0c', width=25, cursor='hand2', command=self.send_otp)
         self.confirm_email_btn.place(relx=0.5, rely=0.59, anchor='center')
+    
+    def canvas_focus(self, event):
+        self.focus_set()
 
+    def entry_user_enter(self, event):
+        if self.entry_email.get() == 'Email':
+            self.entry_email.delete(0, tk.END)
+            self.entry_email.insert(0, '')
+    
+    def entry_user_leave(self, event):
+        if self.entry_email.get() == '':
+            self.entry_email.delete(0, tk.END)
+            self.entry_email.insert(0, 'Email')
     def show_confirm_otp_entry(self, email):
         self.forgot_pass_lb.place_forget()
         self.confirm_email_btn.place_forget()
@@ -1077,8 +1094,6 @@ class ForgotPassword(tk.Frame):
 
         self.back_button3.bind('<Button-1>', self.back_btn3)
 
-        remaining_time = 180
-
         self.change_pass_lb = tk.Label(self, text="Change Password", font=("Montserrat", 40, "bold"),
                                      fg='#00FF00', bg='#0c0c0c', highlightbackground='#00FF00')
         self.change_pass_lb.place(relx=0.5, rely=0.2, anchor='center')
@@ -1087,15 +1102,49 @@ class ForgotPassword(tk.Frame):
                                      fg='#00FF00', bg='#0c0c0c', highlightbackground='#00FF00')
         self.change_lb.place(relx=0.5, rely=0.32, anchor='center')
 
-        self.new_password = tk.Entry(self, font=('Monospac821 BT', 17), width=30, justify='center', fg='white', bg='#323232', show='*')
+        self.new_password = tk.Entry(self, font=('Monospac821 BT', 17), width=30, justify='center', fg='white', bg='#323232', show='')
         self.new_password.place(relx=0.5, rely=0.43, anchor='center')
 
-        self.confirm_new_password1 = tk.Entry(self, font=('Monospac821 BT', 17), width=30, justify='center', fg='white', bg='#323232', show='*')
+        self.confirm_new_password1 = tk.Entry(self, font=('Monospac821 BT', 17), width=30, justify='center', fg='white', bg='#323232', show='')
         self.confirm_new_password1.place(relx=0.5, rely=0.53, anchor='center')
 
         self.change_pass_btn = tk.Button(self, text='Change Password', font=('Montserrat', 17, 'bold'), 
                                    fg='#00FF00', bg='#0c0c0c', width=25, cursor='hand2', command=lambda: self.change_pass(email))
         self.change_pass_btn.place(relx=0.5, rely=0.7, anchor='center')
+
+        self.new_password.insert(0, 'New Password')
+        self.confirm_new_password1.insert(0, 'Confirm Password')
+
+        self.new_password.bind('<FocusIn>', self.new_focus)
+        self.confirm_new_password1.bind('<FocusIn>', self.confirm_focus)
+        self.new_password.bind('<FocusOut>', self.new_focus_out)
+        self.confirm_new_password1.bind('<FocusOut>', self.confirm_focus_out)
+
+    def new_focus(self, event):
+        if self.new_password.get() == 'New Password':
+            self.new_password.delete(0, tk.END)
+            self.new_password.insert(0, '')
+            self.new_password.config(show='*')
+
+            
+    def new_focus_out(self, event):
+        if self.new_password.get() == '':
+            self.new_password.delete(0, tk.END)
+            self.new_password.insert(0, 'New Password')
+            self.new_password.config(show='')
+            
+
+    def confirm_focus(self, event):
+        if self.confirm_new_password1.get() == 'Confirm Password':
+            self.confirm_new_password1.delete(0, tk.END)
+            self.confirm_new_password1.insert(0, '')
+            self.confirm_new_password1.config(show='*')
+    
+    def confirm_focus_out(self, event):
+        if self.confirm_new_password1.get() == '':
+            self.confirm_new_password1.delete(0, tk.END)
+            self.confirm_new_password1.insert(0, 'Confirm Password')
+            self.confirm_new_password1.config(show='')
 
     def change_pass(self, email):
         password = self.new_password.get().strip()
