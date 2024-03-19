@@ -399,9 +399,10 @@ By logging into the platform, users acknowledge that they have read, understood,
             self.photo = ImageTk.PhotoImage(self.original_image)
             self.image_label.config(image=self.photo)
             self.image_label.image = self.photo
+            
     def start_crop(self):
-        if not hasattr(self, 'original_image'):
-            messagebox.showerror("Error", "Please upload an image first.")
+        if self.original_image is None:
+            messagebox.showerror("Error", "Please load an image first.")
             return
 
         self.top = tk.Toplevel(self)
@@ -469,6 +470,7 @@ By logging into the platform, users acknowledge that they have read, understood,
             return False
         
     def onclick_create(self):
+        
         fname = self.fname_entry.get()
         mname = self.mname_entry.get()
         lname = self.lname_entry.get()
@@ -502,22 +504,27 @@ By logging into the platform, users acknowledge that they have read, understood,
         elif not self.validate_input(lname):
             messagebox.showerror('Error', 'Last Name must contain only letters')
             return
-        elif not contact.replace("+", "").replace(" ", "").isdigit():
-            messagebox.showerror('Error', 'Contact Number must contain only numbers')
-            return
-        elif not self.validate_input(city):
-            messagebox.showerror('Error', 'City must contain only letters')
-            return
-        elif not self.validate_input(province):
+        elif not len(mname) == 1:
+                messagebox.showerror('Error', 'Middle Name must contain only 1 letter')
+                return
+        if not province.replace(" ", "").isalpha():
             messagebox.showerror('Error', 'Province must contain only letters')
             return
+        
+        if not city.replace(" ", "").isalpha():
+            messagebox.showerror('Error', 'City must contain only letters')
+            return
+        
         if len(contact) != 13:
             messagebox.showerror('Error', 'Contact Number must be 13 digits')
             return
         elif len(password) <= 5:
             messagebox.showerror('Error', 'Password must be at least 6 characters')
             return
-
+        if not (contact.replace("+", "").isdigit()):
+            messagebox.showerror('Error', 'Contact Number must be a number')
+            return
+        
         if self.chk_box_var.get() == 0:
             messagebox.showwarning('Terms & Conditions', 'Terms & condition is unchecked')
             return
@@ -653,7 +660,7 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.resend_lb = tk.Label(self.pop_up_frame, text="", font=('Monospac821 BT', 10, 'bold'), fg='#00FF00', bg='#0c0c0c')
         self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 1.5, window=self.resend_lb)
 
-        def  generate_captcha(text_length = 6, folder = 'captcha'):
+        def  generate_captcha(text_length = 4, folder = 'captcha'):
             characters = string.ascii_letters + string.digits
             captcha_text = ''.join(random.choices(characters, k=text_length))
             captcha = ImageCaptcha()
