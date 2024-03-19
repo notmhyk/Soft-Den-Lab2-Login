@@ -910,11 +910,23 @@ class ForgotPassword(tk.Frame):
         tk.Frame.__init__(self, master)
         self.parent = master
         self.master.title('Forgot Password')
+        master.minsize(width=1161, height=462)
+        
         self.config(background='black')
         self.back_image_path = 'back.png'
         self.create_labels()
         self.show_canvas()
         self.show_email_entry()
+
+        master.bind('<Unmap>', self.on_minimize_signup)
+        master.bind('<Map>', self.on_restore_signup)
+        
+
+    def on_minimize_signup(self, event):
+        self.parent.geometry("1161x462")
+
+    def on_restore_signup(self, event):
+        self.parent.geometry("1161x462")
 
     def create_labels(self):
         labels = []
