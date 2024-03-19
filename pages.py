@@ -56,12 +56,18 @@ class LoginPage(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
         self.parent = master
+        self.parent.title('Login')
         self.config(background='black')
         master.minsize(width=787, height=461)
-
+        master.bind('<Unmap>', self.on_minimize)
+        master.bind('<Map>', self.on_restore)
         self.create_labels()
         self.show_canvas()
+    def on_minimize(self, event):
+        self.parent.geometry("787x461")
 
+    def on_restore(self, event):
+        self.parent.geometry("787x461")
     def create_labels(self):
         labels = []
         for i in range(11):
@@ -179,12 +185,21 @@ class SignUpPage(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         self.parent = master
+        self.parent.title('Sign Up')
         master.minsize(width=1062, height=638)
+        master.bind('<Unmap>', self.on_minimize_signup)
+        master.bind('<Map>', self.on_restore_signup)
         self.config(background='black')
         self.original_image = None
         self.create_labels()
         self.show_canvas()
-        
+
+    def on_minimize_signup(self, event):
+        self.parent.geometry("1062x638")
+
+    def on_restore_signup(self, event):
+        self.parent.geometry("1062x638")
+
     def create_labels(self):
         labels = []
         for i in range(11):
@@ -884,6 +899,14 @@ class LandingPage(tk.Frame):
         self.master = master
         self.master.title('Landing Page')
         self.label = tk.Label(self, text='LANDING PAGE')
+        self.label.grid(row=0, column=0)
+
+class ForgotPassword(tk.Frame):
+    def __init__(self, master):
+        tk.Frame.__init__(self, master)
+        self.master = master
+        self.master.title('Forgot Password')
+        self.label = tk.Label(self, text='Forgot Password')
         self.label.grid(row=0, column=0)
 
 

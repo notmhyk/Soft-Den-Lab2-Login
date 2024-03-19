@@ -11,6 +11,7 @@ class MainWindow(tk.Tk):
         self.frames['LoginPage'] = pages.LoginPage(self)
         self.frames['SignUpPage'] = pages.SignUpPage(self)
         self.frames['LandingPage'] = pages.LandingPage(self)
+        self.frames['ForgotPassword'] = pages.ForgotPassword(self)
         self.change_frame('SignUpPage')
 
     def change_frame(self, name):
@@ -22,6 +23,8 @@ class MainWindow(tk.Tk):
             self.frames[name] = pages.SignUpPage(self)
         elif name == 'LandingPage':
             self.frames[name] = pages.LandingPage(self)
+        elif name == 'ForgotPassword':
+            self.frames[name] = pages.ForgotPassword(self)
         self.frames[name].grid(row=0, column=0, sticky='nsew')
         
 
