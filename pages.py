@@ -146,6 +146,10 @@ class LoginPage(tk.Frame):
         self.entry_email.bind('<FocusIn>', self.entry_user_enter)
         self.entry_email.bind('<FocusOut>', self.entry_user_leave)
         self.canvas.bind('<Button-1>', self.canvas_clicked)
+        self.forgot_pass_label.bind('<Button-1>', self.on_click_forgot_pass)
+
+    def on_click_forgot_pass(self, event):
+        self.parent.change_frame('ForgotPassword')
 
     def on_click_sign_up(self, event):
         self.parent.change_frame('SignUpPage')
@@ -904,10 +908,213 @@ class LandingPage(tk.Frame):
 class ForgotPassword(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
-        self.master = master
+        self.parent = master
         self.master.title('Forgot Password')
-        self.label = tk.Label(self, text='Forgot Password')
-        self.label.grid(row=0, column=0)
+        self.config(background='black')
+        self.back_image_path = 'back.png'
+        self.create_labels()
+        self.show_canvas()
+        self.show_email_entry()
+
+    def create_labels(self):
+        labels = []
+        for i in range(11):
+            for j in range(19):
+                label = FadingLabel(self, text="", width=10, height=4, background="#121212")
+                label.grid(row=i, column=j, padx=2, pady=2, ipadx=1, ipady=1)
+                labels.append(label)
+
+    def show_canvas(self):
+        self.canvas_width = 600
+        self.canvas_height = 500
+        self.canvas = tk.Canvas(self, width=self.canvas_width, height=self.canvas_height, bg='#0c0c0c', 
+                                highlightbackground='#00FF00', highlightthickness=4)
+        self.canvas.grid(row=1, column=4, rowspan=9, columnspan=11, sticky='nsew')
+        self.canvas.config(highlightbackground='#00FF00')
+        for i in range(11):
+            self.grid_rowconfigure(i, weight=1)
+        for j in range(19):  
+            self.grid_columnconfigure(j, weight=1)
+
+    def show_email_entry(self):
+        
+        self.pil_image_back_image1 = Image.open(self.back_image_path)
+        self.resize_back_image1 = self.pil_image_back_image1.resize((30,30))
+        self.image_back_image1 = ImageTk.PhotoImage(self.resize_back_image1)
+        self.back_button1 = tk.Label(self, image=self.image_back_image1, bg='#0c0c0c', cursor='hand2')
+        self.back_button1.place(relx=0.75, rely=0.15, anchor='center')
+
+        self.back_button1.bind('<Button-1>', self.back_btn1)
+
+        self.forgot_pass_lb = tk.Label(self, text="Forgot Password", font=("Montserrat", 40, "bold"),
+                                     fg='#00FF00', bg='#0c0c0c', highlightbackground='#00FF00')
+        self.forgot_pass_lb.place(relx=0.5, rely=0.2, anchor='center')
+        self.entry_email = tk.Entry(self, font=('Monospac821 BT', 17), width=30, justify='center', fg='white', bg='#323232')
+        self.entry_email.place(relx=0.5, rely=0.4, anchor='center')
+
+        self.confirm_email_btn = tk.Button(self, text='Search Account', font=('Montserrat', 17, 'bold'), 
+                                   fg='#00FF00', bg='#0c0c0c', width=25, cursor='hand2', command=self.send_otp)
+        self.confirm_email_btn.place(relx=0.5, rely=0.59, anchor='center')
+
+    def show_confirm_otp_entry(self, email):
+        self.forgot_pass_lb.place_forget()
+        self.confirm_email_btn.place_forget()
+        self.entry_email.place_forget()
+        self.back_button1.place_forget()
+
+        self.pil_image_back_image2 = Image.open(self.back_image_path)
+        self.resize_back_image2 = self.pil_image_back_image2.resize((30,30))
+        self.image_back_image2 = ImageTk.PhotoImage(self.resize_back_image2)
+        self.back_button2 = tk.Label(self, image=self.image_back_image2, bg='#0c0c0c', cursor='hand2')
+        self.back_button2.place(relx=0.75, rely=0.15, anchor='center')
+
+        self.back_button2.bind('<Button-1>', self.back_btn2)
+
+        self.confirm_otp_lb = tk.Label(self, text="Confirm OTP", font=("Montserrat", 40, "bold"),
+                                     fg='#00FF00', bg='#0c0c0c', highlightbackground='#00FF00')
+        self.confirm_otp_lb.place(relx=0.5, rely=0.2, anchor='center')
+
+        self.label = tk.Label(self, text="OTP has been sent to your email", font=("Montserrat", 14,),
+                                     fg='#00FF00', bg='#0c0c0c', highlightbackground='#00FF00')
+        self.label.place(relx=0.5, rely=0.35, anchor='center')
+
+        self.confirm_otp = tk.Entry(self, font=('Monospac821 BT', 14), width=20, justify='center', fg='white', bg='#323232')
+        self.confirm_otp.place(relx=0.5, rely=0.45, anchor='center')
+
+        self.confirm_otp_btn = tk.Button(self, text='Confirm OTP', font=('Montserrat', 17, 'bold'), 
+                                   fg='#00FF00', bg='#0c0c0c', width=25, cursor='hand2', command=lambda: self.check_otp(email))
+        self.confirm_otp_btn.place(relx=0.5, rely=0.6, anchor='center')
+
+    def send_otp(self):
+        email = self.entry_email.get()
+        
+        if self.entry_email.get() == '':
+            messagebox.showerror("Error", "Please enter an email")
+            return
+        
+        if self.parent.db_handler.email_search(email):
+            self.otp_code = ''
+            self.generate_otp(email)
+        else:
+            messagebox.showerror("Error", "Account does not exists")
+            return
+
+    def send_email(self, email):
+        emailSender = 'receiver.not404@gmail.com'
+        emailPassword = 'yhwb ijon zrxw hpzj'
+        emailReceiver = self.entry_email.get()
+
+        subject = 'One-Time-Password'
+        body = f"""
+        Your One Time Password (OTP) for CHANGE ACCOUNT PASSWORD is: {self.otp_code}. 
+        Please use this OTP to complete your change password process. Do not share this OTP with anyone for security reasons
+        """
+
+        em = EmailMessage()
+
+        em['From'] = emailSender
+        em['To'] = emailReceiver
+        em['Subject'] = subject
+        em.set_content(body)
+
+
+        context = ssl.create_default_context()
+
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+            smtp.login(emailSender, emailPassword)
+            smtp.sendmail(emailSender, emailReceiver, em.as_string())
+        print(self.otp_code)
+        self.show_confirm_otp_entry(email)
+
+    def generate_otp(self, email):
+        self.otp_code = ''.join(str(randint(0, 9)) for _ in range(6))
+        self.send_email(email)
+
+    def check_otp(self, email):
+        otp = self.confirm_otp.get().strip()
+        print("Entered OTP:", otp)
+        print("Stored OTP:", self.otp_code)
+        if self.otp_code != otp :
+            messagebox.showerror("Error", "OTP does not match")
+            return
+        elif self.confirm_otp.get() == '':
+            messagebox.showerror("Error", "Please enter OTP")
+            return
+        else:
+            self.change_function_pass(email)
+    def change_function_pass(self, email):
+        
+        self.confirm_otp_lb.place_forget()
+        self.confirm_otp_btn.place_forget()
+        self.confirm_otp.place_forget()
+        self.label.place_forget()
+        self.back_button2.place_forget()
+
+        self.pil_image_back_image3 = Image.open(self.back_image_path)
+        self.resize_back_image3 = self.pil_image_back_image3.resize((30,30))
+        self.image_back_image3 = ImageTk.PhotoImage(self.resize_back_image3)
+        self.back_button3 = tk.Label(self, image=self.image_back_image3, bg='#0c0c0c', cursor='hand2')
+        self.back_button3.place(relx=0.75, rely=0.15, anchor='center')
+
+        self.back_button3.bind('<Button-1>', self.back_btn3)
+
+        remaining_time = 180
+
+        self.change_pass_lb = tk.Label(self, text="Change Password", font=("Montserrat", 40, "bold"),
+                                     fg='#00FF00', bg='#0c0c0c', highlightbackground='#00FF00')
+        self.change_pass_lb.place(relx=0.5, rely=0.2, anchor='center')
+
+        self.change_lb = tk.Label(self, text="Input new password", font=("Montserrat", 17),
+                                     fg='#00FF00', bg='#0c0c0c', highlightbackground='#00FF00')
+        self.change_lb.place(relx=0.5, rely=0.32, anchor='center')
+
+        self.new_password = tk.Entry(self, font=('Monospac821 BT', 17), width=30, justify='center', fg='white', bg='#323232', show='*')
+        self.new_password.place(relx=0.5, rely=0.43, anchor='center')
+
+        self.confirm_new_password1 = tk.Entry(self, font=('Monospac821 BT', 17), width=30, justify='center', fg='white', bg='#323232', show='*')
+        self.confirm_new_password1.place(relx=0.5, rely=0.53, anchor='center')
+
+        self.change_pass_btn = tk.Button(self, text='Change Password', font=('Montserrat', 17, 'bold'), 
+                                   fg='#00FF00', bg='#0c0c0c', width=25, cursor='hand2', command=lambda: self.change_pass(email))
+        self.change_pass_btn.place(relx=0.5, rely=0.7, anchor='center')
+
+    def change_pass(self, email):
+        password = self.new_password.get().strip()
+        email_to_change = email
+
+        if self.new_password.get() == '':
+            messagebox.showerror("Error", "Please enter new password")
+            return
+        elif self.confirm_new_password1.get() == '':
+            messagebox.showerror("Error", "Please confirm new password")
+            return
+        elif self.new_password.get()!= self.confirm_new_password1.get():
+            messagebox.showerror("Error", "Passwords do not match")
+            return
+        else:
+            self.parent.db_handler.change_pass(email_to_change, password)
+            messagebox.showinfo("Success", "Password changed successfully")
+            self.parent.change_frame('LoginPage')
+        
+        
+    def back_btn3(self, event):
+        self.change_pass_lb.place_forget()
+        self.change_lb.place_forget()
+        self.new_password.place_forget()
+        self.confirm_new_password1.place_forget()
+        self.change_pass_btn.place_forget()
+        self.show_email_entry()
+
+    def back_btn2(self, event):
+        self.confirm_otp_lb.place_forget()
+        self.confirm_otp_btn.place_forget()
+        self.confirm_otp.place_forget()
+        self.label.place_forget()
+        self.show_email_entry()
+        
+    def back_btn1(self, event):
+        self.parent.change_frame('LoginPage')
+
 
 
 

@@ -38,6 +38,23 @@ class DBHandler:
         else:
             return False
 
+    def email_search(self, email):
+        query = f'SELECT * FROM {self.profile_table} WHERE email =?'
+        values = (email,)
+        self.cursor.execute(query, values)
+        result = self.cursor.fetchone()
+
+        if result:
+            return True
+        else:
+            return False
+
+    def change_pass(self, email, password):
+        query = f'UPDATE {self.profile_table} SET password =? WHERE email =?'
+        values = (password, email)
+        self.cursor.execute(query, values)
+        self.conn.commit()
+
     def close(self):
         self.conn.close()
     
