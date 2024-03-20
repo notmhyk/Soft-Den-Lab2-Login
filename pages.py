@@ -904,20 +904,12 @@ By logging into the platform, users acknowledge that they have read, understood,
     def onclick(self, event):
         self.parent.change_frame('LoginPage')
 
-class LandingPage(tk.Frame):
-    def __init__(self, master):
-        tk.Frame.__init__(self, master)
-        self.master = master
-        self.master.title('Landing Page')
-        self.label = tk.Label(self, text='LANDING PAGE')
-        self.label.grid(row=0, column=0)
-
 class ForgotPassword(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         self.parent = master
         self.master.title('Forgot Password')
-        master.minsize(width=1161, height=462)
+        master.minsize(width=851, height=462)
         
         self.config(background='black')
         self.back_image_path = 'back.png'
@@ -930,10 +922,10 @@ class ForgotPassword(tk.Frame):
         
 
     def on_minimize_signup(self, event):
-        self.parent.geometry("1161x462")
+        self.parent.geometry("851x462")
 
     def on_restore_signup(self, event):
-        self.parent.geometry("1161x462")
+        self.parent.geometry("851x462")
 
     def create_labels(self):
         labels = []
@@ -961,8 +953,8 @@ class ForgotPassword(tk.Frame):
         self.pil_image_back_image1 = Image.open(self.back_image_path)
         self.resize_back_image1 = self.pil_image_back_image1.resize((30,30))
         self.image_back_image1 = ImageTk.PhotoImage(self.resize_back_image1)
-        self.back_button1 = tk.Label(self, image=self.image_back_image1, bg='#0c0c0c', cursor='hand2')
-        self.back_button1.place(relx=0.75, rely=0.15, anchor='center')
+        self.back_button1 = tk.Label(self, image=self.image_back_image1, bg='#121212', cursor='hand2')
+        self.back_button1.place(relx=0.92, rely=0.135, anchor='center')
 
         self.back_button1.bind('<Button-1>', self.back_btn1)
 
@@ -1001,8 +993,8 @@ class ForgotPassword(tk.Frame):
         self.pil_image_back_image2 = Image.open(self.back_image_path)
         self.resize_back_image2 = self.pil_image_back_image2.resize((30,30))
         self.image_back_image2 = ImageTk.PhotoImage(self.resize_back_image2)
-        self.back_button2 = tk.Label(self, image=self.image_back_image2, bg='#0c0c0c', cursor='hand2')
-        self.back_button2.place(relx=0.75, rely=0.15, anchor='center')
+        self.back_button2 = tk.Label(self, image=self.image_back_image2, bg='#121212', cursor='hand2')
+        self.back_button2.place(relx=0.92, rely=0.135, anchor='center')
 
         self.back_button2.bind('<Button-1>', self.back_btn2)
 
@@ -1089,12 +1081,12 @@ class ForgotPassword(tk.Frame):
         self.pil_image_back_image3 = Image.open(self.back_image_path)
         self.resize_back_image3 = self.pil_image_back_image3.resize((30,30))
         self.image_back_image3 = ImageTk.PhotoImage(self.resize_back_image3)
-        self.back_button3 = tk.Label(self, image=self.image_back_image3, bg='#0c0c0c', cursor='hand2')
-        self.back_button3.place(relx=0.75, rely=0.15, anchor='center')
+        self.back_button3 = tk.Label(self, image=self.image_back_image3, bg='#121212', cursor='hand2')
+        self.back_button3.place(relx=0.92, rely=0.135, anchor='center')
 
         self.back_button3.bind('<Button-1>', self.back_btn3)
 
-        self.change_pass_lb = tk.Label(self, text="Change Password", font=("Montserrat", 40, "bold"),
+        self.change_pass_lb = tk.Label(self, text="Change Password", font=("Montserrat", 35, "bold"),
                                      fg='#00FF00', bg='#0c0c0c', highlightbackground='#00FF00')
         self.change_pass_lb.place(relx=0.5, rely=0.2, anchor='center')
 
@@ -1183,6 +1175,51 @@ class ForgotPassword(tk.Frame):
     def back_btn1(self, event):
         self.parent.change_frame('LoginPage')
 
+class LandingPage(tk.Frame):
+    def __init__(self, master):
+        tk.Frame.__init__(self, master)
+        self.master = master
+        self.master.title('Landing Page')
+        self.config(background='black')
+        self.label = tk.Label(self, text='LANDING PAGE')
+        self.label.grid(row=0, column=0)
 
 
+class ViewPage(tk.Frame):
+    def __init__(self, master):
+        tk.Frame.__init__(self, master)
+        self.parent = master
+        self.master.title('View Profile')
+        self.config(background='black')
+        self.create_labels()
+        self.show_canvas()
+
+    def create_labels(self):
+        labels = []
+        for i in range(11):
+            for j in range(19):
+                label = FadingLabel(self, text="", width=10, height=4, background="#121212")
+                label.grid(row=i, column=j, padx=2, pady=2, ipadx=1, ipady=1)
+                labels.append(label)
+                label.bind('<Button-1>', self.focusSet)
+
+    def focusSet(self, event):
+        self.focus_set()
+
+    def show_canvas(self):
+        self.canvas_width = 600
+        self.canvas_height = 500
+        self.canvas = tk.Canvas(self, width=self.canvas_width, height=self.canvas_height, bg='#0c0c0c', 
+                                highlightbackground='#00FF00', highlightthickness=4)
+        self.canvas.grid(row=1, column=2, rowspan=9, columnspan=15, sticky='nsew')
+        self.canvas.config(highlightbackground='#00FF00')
+        for i in range(11):
+            self.grid_rowconfigure(i, weight=1)
+        for j in range(19):  
+            self.grid_columnconfigure(j, weight=1)
+        self.show_object()
+
+    def show_object(self):
+        self.image_label = tk.Label(self, text='No Image Uploaded', font=('Monospac821 BT', 12), fg='#00FF00', bg='#0c0c0c', cursor='hand2', image='')
+        self.image_label.place(relx=0.16, rely=0.3, anchor='w')
 
