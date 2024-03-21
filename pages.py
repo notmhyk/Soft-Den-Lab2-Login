@@ -124,20 +124,18 @@ class LoginPage(tk.Frame):
         email = self.entry_email.get()
         password = self.entry_pass.get()
         
-        if email == '':
+        if email == 'Email':
             messagebox.showerror('Error', 'Email cannot be empty')
             return
-        elif password == '':
+        elif password == 'Password':
             messagebox.showerror('Error', 'Password cannot be empty')
             return
         
         if self.parent.db_handler.acc_login(email, password):
             self.parent.change_frame('LandingPage')
-        
         else:
             messagebox.showerror("Invalid Login", "Invalid username or password")
             return
-        
 
     def bind(self):
         self.entry_pass.bind('<FocusIn>', self.entry_pass_enter)
@@ -197,6 +195,20 @@ class SignUpPage(tk.Frame):
         self.original_image = None
         self.create_labels()
         self.show_canvas()
+        def center_option_menus(event=None):
+            window_width = self.winfo_width()
+
+            marital_status_width = self.marital_status_menu.winfo_reqwidth()
+            marital_status_x = (window_width * 0.078) - (marital_status_width / 2)
+
+            gender_width = self.gender.winfo_reqwidth()
+            gender_x = (window_width * 0.075) - (gender_width / 2)
+
+            self.marital_status_menu.place(x=marital_status_x, rely=0.85, anchor='w')
+            self.gender.place(x=gender_x, rely=0.6, anchor='w')
+
+        center_option_menus()
+        master.bind("<Configure>", center_option_menus)
 
     def on_minimize_signup(self, event):
         self.parent.geometry("1062x638")
@@ -244,14 +256,37 @@ class SignUpPage(tk.Frame):
         self.other_label = tk.Label(self, text='Other Info', font=('Monospac821 BT', 11), fg='#00FF00', bg='#0c0c0c')
         self.other_label.place(relx=0.15, rely=0.54, anchor='w')
 
-        self.contact_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
-        self.contact_entry.place(relx=0.25, rely=0.6, anchor='center')
+        # self.contact_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
+        # self.contact_entry.place(relx=0.25, rely=0.6, anchor='center')
+        self.gender_options = ["Gender","Male", "Female", "Others"]
+        self.gender_var = tk.StringVar()
+        self.gender_var.set(self.gender_options[0])
+
+        self.gender = tk.OptionMenu(self, self.gender_var, *self.gender_options)
+        self.gender.config(bg='#0c0c0c', fg='#00FF00', font=('Monospac821 BT', 12), width=15, highlightbackground='#0c0c0c', highlightthickness=1)
+        self.gender.place(relx=0.18, rely=0.6, anchor='w')
 
         self.city_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
         self.city_entry.place(relx=0.25, rely=0.68, anchor='center')
 
         self.province_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
         self.province_entry.place(relx=0.25, rely=0.77, anchor='center')
+
+        self.marital_status_options = [
+            "Status",
+            "Single",
+            "Married",
+            "Widowed",
+            "Divorced",
+            "Separated",
+            "Annulled",
+            "In a Relationship",
+            "Other"]
+        self.marital_status_var = tk.StringVar()
+        self.marital_status_var.set(self.marital_status_options[0])
+        self.marital_status_menu = tk.OptionMenu(self, self.marital_status_var, *self.marital_status_options)
+        self.marital_status_menu.config(bg='#0c0c0c', fg='#00FF00', font=('Monospac821 BT', 12), width=17, highlightbackground='#0c0c0c', highlightthickness=1)
+        self.marital_status_menu.place(relx=0.175, rely=0.85, anchor='w')
 
         self.account_label = tk.Label(self, text='Account Info', font=('Monospac821 BT', 11), fg='#00FF00', bg='#0c0c0c')
         self.account_label.place(relx=0.37, rely=0.21, anchor='w')
@@ -336,7 +371,7 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.fname_entry.insert(0, 'First Name')
         self.mname_entry.insert(0, 'MI (Optional)')
         self.lname_entry.insert(0, 'Last Name')
-        self.contact_entry.insert(0, 'Contact Number')
+        # self.contact_entry.insert(0, 'Contact Number')
         self.city_entry.insert(0, 'City')
         self.province_entry.insert(0, 'Province')
         self.email_entry.insert(0, 'Email')
@@ -474,14 +509,16 @@ By logging into the platform, users acknowledge that they have read, understood,
         fname = self.fname_entry.get()
         mname = self.mname_entry.get()
         lname = self.lname_entry.get()
-        contact = self.contact_entry.get()
+        # contact = self.contact_entry.get()
+        gender = self.gender_var.get()
         city = self.city_entry.get()
         province = self.province_entry.get()
+        status = self.marital_status_var.get()
         email = self.email_entry.get()
         password = self.pass_entry.get()
         confirm_password = self.confirm_pass_entry.get()
 
-        if fname == 'First Name'or lname == 'Last Name' or contact == 'Contact Number' or city == 'City' or province == 'Province' or email == 'Email' or confirm_password == 'Confirm Password':
+        if fname == 'First Name'or lname == 'Last Name' or gender == 'Gender' or city == 'City' or province == 'Province' or status == 'Status' or email == 'Email' or confirm_password == 'Confirm Password':
             messagebox.showerror('Error', 'Please fill all the fields')
             return
         elif password == 'Password' or password == 'password':
@@ -507,23 +544,34 @@ By logging into the platform, users acknowledge that they have read, understood,
         elif not len(mname) == 1:
                 messagebox.showerror('Error', 'Middle Name must contain only 1 letter')
                 return
-        if not province.replace(" ", "").isalpha():
-            messagebox.showerror('Error', 'Province must contain only letters')
+        
+        if self.gender_var.get() == "Gender":
+            messagebox.showerror('Error', 'Please select gender')
             return
         
+        if self.marital_status_var.get() == "Status":
+            messagebox.showerror('Error', 'Please select marital status')
+            return
+
         if not city.replace(" ", "").isalpha():
             messagebox.showerror('Error', 'City must contain only letters')
             return
         
-        if len(contact) != 13:
-            messagebox.showerror('Error', 'Contact Number must be 13 digits')
+        if not province.replace(" ", "").isalpha():
+            messagebox.showerror('Error', 'Province must contain only letters')
             return
-        elif len(password) <= 5:
+        
+        # if len(contact) != 13:
+        #     messagebox.showerror('Error', 'Contact Number must be 13 digits')
+        #     return
+        
+        if len(password) <= 5:
             messagebox.showerror('Error', 'Password must be at least 6 characters')
             return
-        if not (contact.replace("+", "").isdigit()):
-            messagebox.showerror('Error', 'Contact Number must be a number')
-            return
+        
+        # if not (contact.replace("+", "").isdigit()):
+        #     messagebox.showerror('Error', 'Contact Number must start (+63)')
+        #     return
         
         if self.chk_box_var.get() == 0:
             messagebox.showwarning('Terms & Conditions', 'Terms & condition is unchecked')
@@ -532,6 +580,7 @@ By logging into the platform, users acknowledge that they have read, understood,
         if not hasattr(self, 'original_image'):
             messagebox.showerror("Error", "Please upload an image first.")
             return
+        
         elif '@gmail.com' not in email:
             messagebox.showerror("Error", "Please enter a valid Gmail address.")
             return
@@ -553,8 +602,8 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.confirm_pass_entry.bind('<FocusIn>', self.confirm_pass_entry_enter)
         self.confirm_pass_entry.bind('<FocusOut>', self.confirm_pass_entry_leave)
         self.canvas.bind('<Button-1>', self.canvas_clicked)
-        self.contact_entry.bind('<FocusIn>', self.contact_entry_enter)
-        self.contact_entry.bind('<FocusOut>', self.contact_entry_leave)
+        # self.contact_entry.bind('<FocusIn>', self.contact_entry_enter)
+        # self.contact_entry.bind('<FocusOut>', self.contact_entry_leave)
         self.city_entry.bind('<FocusIn>', self.city_entry_enter)
         self.city_entry.bind('<FocusOut>', self.city_entry_leave)
         self.province_entry.bind('<FocusIn>', self.province_entry_enter)
@@ -566,16 +615,18 @@ By logging into the platform, users acknowledge that they have read, understood,
         fname = self.fname_entry.get()
         mname = self.mname_entry.get()
         lname = self.lname_entry.get()
-        contact = self.contact_entry.get()
+        # contact = self.contact_entry.get()
+        gender = self.gender_var.get()
         city = self.city_entry.get()
         province = self.province_entry.get()
+        status = self.marital_status_var.get()
         email = self.email_entry.get()
         password = self.pass_entry.get()
         confirm_password = self.confirm_pass_entry.get()
 
-        if  fname == 'First Name' and mname == 'MI (Optional)' and lname == 'Last Name' and contact == 'Contact Number' and city == 'City' and province == 'Province' and email == 'Email' and password == 'Password' and confirm_password == 'Confirm Password':
+        if  fname == 'First Name' and mname == 'MI (Optional)' and lname == 'Last Name' and gender == 'Gender' and city == 'City' and province == 'Province' and status == "Status" and email == 'Email' and password == 'Password' and confirm_password == 'Confirm Password':
             self.parent.change_frame('LoginPage')
-        elif fname or mname or lname or contact or city or province or email or password or confirm_password:
+        elif fname or mname or lname or gender or city or province or status or email or password or confirm_password:
             confirmed = messagebox.askyesno('Warning', 'Are you sure you want to cancel?')
             if not confirmed:
                 return
@@ -598,9 +649,11 @@ By logging into the platform, users acknowledge that they have read, understood,
         fname = self.fname_entry.get()
         mname = self.mname_entry.get()
         lname = self.lname_entry.get()
-        contact = self.contact_entry.get()
+        # contact = self.contact_entry.get()
+        gender = self.gender_var.get()
         city = self.city_entry.get()
         province = self.province_entry.get()
+        status = self.marital_status_var.get()
         email = self.email_entry.get()
         password = self.pass_entry.get()
         
@@ -716,9 +769,11 @@ By logging into the platform, users acknowledge that they have read, understood,
             profile = models.Profiles()
             profile.fname = fname
             profile.lname = lname
-            profile.contact = contact
+            # profile.contact = contact
+            profile.gender = gender
             profile.city = city
             profile.province = province
+            profile.status = status
             profile.email = email
             profile.password = password
 
@@ -1211,7 +1266,7 @@ class ViewPage(tk.Frame):
         self.canvas_height = 500
         self.canvas = tk.Canvas(self, width=self.canvas_width, height=self.canvas_height, bg='#0c0c0c', 
                                 highlightbackground='#00FF00', highlightthickness=4)
-        self.canvas.grid(row=1, column=2, rowspan=9, columnspan=15, sticky='nsew')
+        self.canvas.grid(row=1, column=4, rowspan=9, columnspan=11, sticky='nsew')
         self.canvas.config(highlightbackground='#00FF00')
         for i in range(11):
             self.grid_rowconfigure(i, weight=1)
@@ -1220,6 +1275,85 @@ class ViewPage(tk.Frame):
         self.show_object()
 
     def show_object(self):
-        self.image_label = tk.Label(self, text='No Image Uploaded', font=('Monospac821 BT', 12), fg='#00FF00', bg='#0c0c0c', cursor='hand2', image='')
-        self.image_label.place(relx=0.16, rely=0.3, anchor='w')
+        
+        self.profile = tk.Label(self, text='No Image Uploaded', font=('Monospac821 BT', 12), fg='#00FF00', bg='#0c0c0c', cursor='hand2', image='')
+        self.profile.place(relx=0.44, rely=0.3, anchor='w')
+
+        def center_label(event=None):
+            window_width = self.winfo_width()
+            label_width = self.profile.winfo_reqwidth()
+            label_x = (window_width - label_width) / 2
+            self.profile.place(relx=label_x / window_width, rely=0.3, anchor='w')
+
+        center_label()
+
+        self.bind("<Configure>", center_label)
+
+        self.name = tk.Entry(self, font=('Monospac821 BT', 17), width=30, justify='center', fg='white', bg='#0c0c0c', highlightthickness=0)
+        self.name.place(relx=0.5, rely=0.5, anchor='center')
+        self.name.insert(0, "Name")
+
+        self.location = tk.Entry(self, font=('Monospac821 BT', 17), width=30, justify='center', fg='white', bg='#0c0c0c', highlightthickness=0)
+        self.location.place(relx=0.5, rely=0.6, anchor='center')
+        self.location.insert(0, "Location")
+
+        self.gender = tk.Entry(self, font=('Monospac821 BT', 17), width=30, justify='center', fg='white', bg='#0c0c0c', highlightthickness=0)
+        self.gender.place(relx=0.5, rely=0.7, anchor='center')
+        self.gender.insert(0, "Gender")
+
+        self.status = tk.Entry(self, font=('Monospac821 BT', 17), width=30, justify='center', fg='white', bg='#0c0c0c', highlightthickness=0)
+        self.status.place(relx=0.5, rely=0.8, anchor='center')
+        self.status.insert(0, "Status")
+
+        self.edit = tk.Label(self, text="Edit", font=('Monospac821 BT', 11, 'underline'), fg='#00FF00', bg='#0c0c0c', cursor='hand2')
+        self.edit.place(relx=0.4, rely=0.87, anchor='w')
+
+        self.save = tk.Label(self, text="Save", font=('Monospac821 BT', 11, 'underline'), fg='#00FF00', bg='#0c0c0c', cursor='hand2')
+        self.save.place(relx=0.58, rely=0.87, anchor='w')
+
+        # self.max_chars_per_line = 22
+        # self.name_text = f"John Mhyk A. Magdangal"
+        # self.formatted_text_name = self.format_text(self.name_text, self.max_chars_per_line)
+        # self.user_name = tk.Label(self, text=self.name_text, font=('Monospac821 BT', 17, 'bold'), fg='#00FF00', bg='#0c0c0c', cursor='hand2')
+        # self.user_name.place(relx=0.4, rely=0.6, anchor='w')
+        
+        # self.address_text = f"San Fernando, Pampanga"
+        # self.formatted_text_address = self.format_text(self.address_text, self.max_chars_per_line)
+        # self.address = tk.Label(self, text=self.formatted_text_address, font=('Monospac821 BT', 20, 'bold'), fg='#00FF00', bg='#0c0c0c', cursor='hand2')
+        # self.address.place(relx=0.13, rely=0.5, anchor='w')
+
+        # self.gender_text = f"Male"
+        # self.gender = tk.Label(self, text=self.gender_text, font=('Monospac821 BT', 20, 'bold'), fg='#00FF00', bg='#0c0c0c', cursor='hand2')
+        # self.gender.place(relx=0.2, rely=0.65, anchor='w')
+
+        # self.status_text = f"Married"
+        # self.status = tk.Label(self, text=self.status_text, font=('Monospac821 BT', 20, 'bold'), fg='#00FF00', bg='#0c0c0c', cursor='hand2')
+        # self.status.place(relx=0.15, rely=0.75, anchor='w')
+
+
+
+        # self.gender_options = ["Gender","Male", "Female", "Others"]
+        # self.gender_var = tk.StringVar()
+        # self.gender_var.set(self.gender_options[0])
+
+        # self.gender = tk.OptionMenu(self, self.gender_var, *self.gender_options)
+        # self.gender.config(bg='#0c0c0c', fg='#00FF00', font=('Monospac821 BT', 14), width=15, highlightbackground='#0c0c0c', highlightthickness=1)
+        # self.gender.place(relx=0.18, rely=0.65, anchor='w')
+
+        # self.marital_status_options = ["Status","Single","Married","Widowed","Divorced","Separated","Annulled","In a Relationship","Other"]
+        # self.marital_status_var = tk.StringVar()
+        # self.marital_status_var.set(self.marital_status_options[0])
+        # self.marital_status_menu = tk.OptionMenu(self, self.marital_status_var, *self.marital_status_options)
+        # self.marital_status_menu.config(bg='#0c0c0c', fg='#00FF00', font=('Monospac821 BT', 14), width=15, highlightbackground='#0c0c0c', highlightthickness=1)
+        # self.marital_status_menu.place(relx=0.18, rely=0.75, anchor='w')
+
+        
+    def format_text(self, text, max_chars):
+        if len(text) <= max_chars:
+            return text
+        else:
+            parts = [text[i:i+max_chars] for i in range(0, len(text), max_chars)]
+            return '\n'.join(parts)
+
+        
 

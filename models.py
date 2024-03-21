@@ -3,9 +3,11 @@ class Profiles:
         self.fname = ''
         self.mname = ''
         self.lname = ''
-        self.contact = 0
+        # self.contact = 0
+        self.gender = ''
         self.city = ''
         self.province = ''
+        self.status = ''
         self.email = ''
         self.password = ''
         self.image_data = None

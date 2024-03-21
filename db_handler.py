@@ -21,8 +21,8 @@ class DBHandler:
             messagebox.showerror('Error', "Email address already exists")
             return
 
-        query = f'INSERT INTO {self.profile_table} (first_name, middle_name, last_name, contact_number, city, province, email, password, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
-        values = (profile.fname, profile.mname, profile.lname, profile.contact, profile.city, profile.province, profile.email, profile.password, profile.image_data)
+        query = f'INSERT INTO {self.profile_table} (first_name, middle_name, last_name, gender, city, province, status, email, password, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        values = (profile.fname, profile.mname, profile.lname, profile.gender, profile.city, profile.province, profile.status, profile.email, profile.password, profile.image_data)
         self.cursor.execute(query, values)
         self.conn.commit()
 
