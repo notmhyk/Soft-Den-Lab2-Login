@@ -132,7 +132,7 @@ class LoginPage(tk.Frame):
             return
         
         if self.parent.db_handler.acc_login(email, password):
-            self.parent.change_frame('ViewPage', email=email)
+            self.parent.change_frame('LandingPage', email=email)
         else:
             messagebox.showerror("Invalid Login", "Invalid username or password")
             return
@@ -1227,13 +1227,26 @@ class ForgotPassword(tk.Frame):
         self.parent.change_frame('LoginPage')
 
 class LandingPage(tk.Frame):
-    def __init__(self, master):
+    def __init__(self, master, email = None, **kwargs):
         tk.Frame.__init__(self, master)
-        self.master = master
+        self.parent = master
         self.master.title('Landing Page')
+        self.email = email
         self.config(background='black')
         self.label = tk.Label(self, text='LANDING PAGE')
         self.label.grid(row=0, column=0)
+        self.label.bind('<Button-1>', self.logout)
+        print("This is the email from landingpage",self.email)
+
+        self.label2 = tk.Label(self, text='View PRofile')
+        self.label2.grid(row=1, column=0)
+        self.label2.bind('<Button-1>', self.view_profile)
+
+    def logout(self, event):
+        self.parent.change_frame('LoginPage')
+
+    def view_profile(self, event):
+        self.parent.change_frame('ViewPage', email=self.email)
 
 class ViewPage(tk.Frame):
     def __init__(self, master, email = None, **kwargs):
@@ -1335,6 +1348,8 @@ class ViewPage(tk.Frame):
         self.back_button = tk.Label(self, image=self.image_back_image, bg='#121212', cursor='hand2')
         self.back_button.place(relx=0.92, rely=0.135, anchor='center')
 
+        self.back_button.bind('<Button-1>', self.back_btn)
+
 
         self.name = tk.Entry(self, font=('Monospac821 BT', 17), width=30, justify='center', fg='white', bg='#0c0c0c', highlightthickness=0)
         self.name.place(relx=0.5, rely=0.5, anchor='center')
@@ -1356,6 +1371,10 @@ class ViewPage(tk.Frame):
         self.edit.place(relx=0.49, rely=0.87, anchor='w')
 
         self.edit.bind('<Button-1>', self.edit_profile)
+
+    def back_btn(self, event):
+        email = self.email
+        self.parent.change_frame('LandingPage', email=email)
     def edit_profile(self, event):
         email = self.email
         self.parent.change_frame('EditProfile', email=self.email)
@@ -1721,7 +1740,7 @@ class EditProfile(tk.Frame):
         db_conn.close()
 
         messagebox.showinfo('Successfully Updated', f'Information updated for {profile.fname}')
-        self.parent.change_frame('LandingPage')
+        self.parent.change_frame('LandingPage', email=email)
 
     def onclick_back(self, event):
         fname = self.fname_entry.get()

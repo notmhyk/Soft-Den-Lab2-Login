@@ -24,7 +24,7 @@ class MainWindow(tk.Tk):
         elif name == 'SignUpPage':
             self.frames[name] = pages.SignUpPage(self)
         elif name == 'LandingPage':
-            self.frames[name] = pages.LandingPage(self)
+            self.frames[name] = pages.LandingPage(self, **kwargs)
         elif name == 'ForgotPassword':
             self.frames[name] = pages.ForgotPassword(self)
         elif name == 'ViewPage':
