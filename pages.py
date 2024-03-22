@@ -235,6 +235,7 @@ class SignUpPage(tk.Frame):
             self.grid_columnconfigure(j, weight=1)
         self.show_object()
 
+
     def show_object(self):
         self.chk_box_var = tk.BooleanVar()
         
@@ -256,8 +257,6 @@ class SignUpPage(tk.Frame):
         self.other_label = tk.Label(self, text='Other Info', font=('Monospac821 BT', 11), fg='#00FF00', bg='#0c0c0c')
         self.other_label.place(relx=0.15, rely=0.54, anchor='w')
 
-        # self.contact_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
-        # self.contact_entry.place(relx=0.25, rely=0.6, anchor='center')
         self.gender_options = ["Gender","Male", "Female", "Others"]
         self.gender_var = tk.StringVar()
         self.gender_var.set(self.gender_options[0])
@@ -371,7 +370,6 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.fname_entry.insert(0, 'First Name')
         self.mname_entry.insert(0, 'MI (Optional)')
         self.lname_entry.insert(0, 'Last Name')
-        # self.contact_entry.insert(0, 'Contact Number')
         self.city_entry.insert(0, 'City')
         self.province_entry.insert(0, 'Province')
         self.email_entry.insert(0, 'Email')
@@ -509,7 +507,6 @@ By logging into the platform, users acknowledge that they have read, understood,
         fname = self.fname_entry.get()
         mname = self.mname_entry.get()
         lname = self.lname_entry.get()
-        # contact = self.contact_entry.get()
         gender = self.gender_var.get()
         city = self.city_entry.get()
         province = self.province_entry.get()
@@ -615,7 +612,6 @@ By logging into the platform, users acknowledge that they have read, understood,
         fname = self.fname_entry.get()
         mname = self.mname_entry.get()
         lname = self.lname_entry.get()
-        # contact = self.contact_entry.get()
         gender = self.gender_var.get()
         city = self.city_entry.get()
         province = self.province_entry.get()
@@ -877,15 +873,15 @@ By logging into the platform, users acknowledge that they have read, understood,
             self.province_entry.delete(0, tk.END)
             self.province_entry.insert(0, 'Province')
 
-    def contact_entry_enter(self, event):
-        if self.contact_entry.get() == 'Contact Number':
-            self.contact_entry.delete(0, tk.END)
-            self.contact_entry.insert(0, '+63')
+    # def contact_entry_enter(self, event):
+    #     if self.contact_entry.get() == 'Contact Number':
+    #         self.contact_entry.delete(0, tk.END)
+    #         self.contact_entry.insert(0, '+63')
             
-    def contact_entry_leave(self, event):
-        if self.contact_entry.get() == '' or self.contact_entry.get() == '+63':
-            self.contact_entry.delete(0, tk.END)
-            self.contact_entry.insert(0, 'Contact Number')
+    # def contact_entry_leave(self, event):
+    #     if self.contact_entry.get() == '' or self.contact_entry.get() == '+63':
+    #         self.contact_entry.delete(0, tk.END)
+    #         self.contact_entry.insert(0, 'Contact Number')
     
     def confirm_pass_entry_enter(self, event):
         if self.confirm_pass_entry.get() == 'Confirm Password':
@@ -1239,7 +1235,6 @@ class LandingPage(tk.Frame):
         self.label = tk.Label(self, text='LANDING PAGE')
         self.label.grid(row=0, column=0)
 
-
 class ViewPage(tk.Frame):
     def __init__(self, master, email = None, **kwargs):
         tk.Frame.__init__(self, master, **kwargs)
@@ -1359,7 +1354,12 @@ class ViewPage(tk.Frame):
 
         self.edit = tk.Label(self, text="Edit", font=('Monospac821 BT', 11, 'underline'), fg='#FFFFFF', bg='#0c0c0c', cursor='hand2')
         self.edit.place(relx=0.49, rely=0.87, anchor='w')
-        
+
+        self.edit.bind('<Button-1>', self.edit_profile)
+    def edit_profile(self, event):
+        email = self.email
+        self.parent.change_frame('EditProfile', email=self.email)
+
     def format_text(self, text, max_chars):
         if len(text) <= max_chars:
             return text
@@ -1367,5 +1367,237 @@ class ViewPage(tk.Frame):
             parts = [text[i:i+max_chars] for i in range(0, len(text), max_chars)]
             return '\n'.join(parts)
 
+class EditProfile(tk.Frame):
+    def __init__(self, master, email = None):
+        tk.Frame.__init__(self, master)
+        self.parent = master
+        self.master.title('Edit Profile')
+        self.email = email
+        master.minsize(width=1062, height=638)
+        master.bind('<Unmap>', self.on_minimize_edit)
+        master.bind('<Map>', self.on_restore_edit)
+        self.config(background='black')
+        self.create_labels()
+        self.show_canvas()
         
+    def on_minimize_edit(self, event):
+        self.parent.geometry("1062x638")
 
+    def on_restore_edit(self, event):
+        self.parent.geometry("1062x638")
+
+    def create_labels(self):
+        labels = []
+        for i in range(11):
+            for j in range(19):
+                label = FadingLabel(self, text="", width=10, height=4, background="#121212")
+                label.grid(row=i, column=j, padx=2, pady=2, ipadx=1, ipady=1)
+                labels.append(label)
+
+    def show_canvas(self):
+        self.canvas_width = 600
+        self.canvas_height = 500
+        self.canvas = tk.Canvas(self, width=self.canvas_width, height=self.canvas_height, bg='#0c0c0c', highlightbackground='#00FF00', highlightthickness=2)
+        self.canvas.grid(row=1, column=3, rowspan=9, columnspan=13, sticky='nsew')
+        for i in range(11):
+            self.grid_rowconfigure(i, weight=1)
+        for j in range(19):  
+            self.grid_columnconfigure(j, weight=1)
+        self.show_object()
+
+    def show_object(self):
+        self.update()
+        self.label = tk.Label(self.canvas, text='Edit Profile', font=('Montserrat', 25, 'bold'), fg='#00FF00', bg='#0c0c0c')
+        self.label.place(relx=0.5, rely=0.02, anchor='n')
+
+        self.personal_label = tk.Label(self, text='Personal Info', font=('Monospac821 BT', 11), fg='#00FF00', bg='#0c0c0c')
+        self.personal_label.place(relx=0.2, rely=0.21, anchor='w')
+
+        self.fname_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
+        self.fname_entry.place(relx=0.3, rely=0.28, anchor='center')
+        
+        self.mname_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
+        self.mname_entry.place(relx=0.3, rely=0.36, anchor='center')
+
+        self.lname_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
+        self.lname_entry.place(relx=0.3, rely=0.44, anchor='center')
+
+        self.other_label = tk.Label(self, text='Other Info', font=('Monospac821 BT', 11), fg='#00FF00', bg='#0c0c0c')
+        self.other_label.place(relx=0.2, rely=0.54, anchor='w')
+
+        self.gender_options = ["Gender","Male", "Female", "Others"]
+        self.gender_var = tk.StringVar()
+        self.gender_var.set(self.user_info[0].gender)
+
+        self.gender = tk.OptionMenu(self, self.gender_var, *self.gender_options)
+        self.gender.config(bg='#0c0c0c', fg='#00FF00', font=('Monospac821 BT', 12), width=15, highlightbackground='#0c0c0c', highlightthickness=1)
+        self.gender.place(relx=0.225, rely=0.6, anchor='w')
+
+        self.city_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
+        self.city_entry.place(relx=0.3, rely=0.68, anchor='center')
+
+        self.province_entry = tk.Entry(self, font=('Monospac821 BT', 12), width=20, justify='center', fg='white', bg='#323232')
+        self.province_entry.place(relx=0.3, rely=0.77, anchor='center')
+
+        self.marital_status_options = [
+            "Status",
+            "Single",
+            "Married",
+            "Widowed",
+            "Divorced",
+            "Separated",
+            "Annulled",
+            "In a Relationship",
+            "Other"]
+        self.marital_status_var = tk.StringVar()
+        self.marital_status_var.set(self.user_info[0].status)
+        self.marital_status_menu = tk.OptionMenu(self, self.marital_status_var, *self.marital_status_options)
+        self.marital_status_menu.config(bg='#0c0c0c', fg='#00FF00', font=('Monospac821 BT', 12), width=17, highlightbackground='#0c0c0c', highlightthickness=1)
+        self.marital_status_menu.place(relx=0.225, rely=0.85, anchor='w')
+
+        self.back_image_path = 'back.png'
+        self.pil_image_back_image = Image.open(self.back_image_path)
+        self.resize_back_image = self.pil_image_back_image.resize((30,30))
+        self.image_back_image = ImageTk.PhotoImage(self.resize_back_image)
+        self.back_button = tk.Label(self, image=self.image_back_image, bg='#0c0c0c', cursor='hand2')
+        self.back_button.place(relx=0.75, rely=0.15, anchor='center')
+
+        self.image_label = tk.Label(self, text='No Image Uploaded', font=('Monospac821 BT', 12), fg='#00FF00', bg='#0c0c0c', cursor='hand2', image='')
+        self.image_label.place(relx=0.6, rely=0.4, anchor='w')
+
+        image_data = self.user_info[0].image_data
+        image = Image.open(io.BytesIO(image_data))
+        image = image.resize((200, 200), Image.LANCZOS)
+        photo = ImageTk.PhotoImage(image)
+        self.image_label.config(image=photo)
+        self.image_label.image = photo
+
+        self.change_profile_btn = tk.Button(self, text='Change Profile', font=('Montserrat', 14, 'bold'), 
+                                   fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command="self.upload_image")
+        self.change_profile_btn.place(relx=0.6, rely=0.6, anchor='w')
+
+        self.crop_btn = tk.Button(self, text='Crop', font=('Montserrat', 14, 'bold'), 
+                                   fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command="self.start_crop")
+        self.crop_btn.place(relx=0.6, rely=0.7, anchor='w')
+
+        self.filter_options = ["Select Filter","Original", "Grayscale", "Blur", "Sharpen",
+                              "Contour", "Edge Enhance", "Emboss", "Smooth", "Brightness", "Contrast"]
+        self.filter_var = tk.StringVar()
+        self.filter_var.set(self.filter_options[0])
+
+        self.filter_menu = tk.OptionMenu(self, self.filter_var, *self.filter_options, command="self.apply_filter")
+        self.filter_menu.config(bg='#0c0c0c', fg='#00FF00', font=('Monospac821 BT', 14), width=15, highlightbackground='#0c0c0c', highlightthickness=1)
+        self.filter_menu.place(relx=0.6, rely=0.8, anchor='w')
+
+        self.save_btn = tk.Button(self, text='Save', font=('Montserrat', 12, 'bold'), 
+                                   fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command="self.upload_image")
+        self.save_btn.place(relx=0.43, rely=0.8, anchor='w')
+
+        self.crop_btn.place_forget()
+        self.filter_menu.place_forget()
+
+        self.fname_entry.insert(0, f"{self.user_info[0].fname}")
+        self.mname_entry.insert(0, f"{self.user_info[0].mname}")
+        self.lname_entry.insert(0, f"{self.user_info[0].lname}")
+        self.city_entry.insert(0, f"{self.user_info[0].city}")
+        self.province_entry.insert(0, f"{self.user_info[0].province}")
+
+        self.bind()
+
+    def bind(self):
+        self.fname_entry.bind('<FocusIn>', self.fname_entry_enter)
+        self.fname_entry.bind('<FocusOut>', self.fname_entry_leave)
+        self.lname_entry.bind('<FocusIn>', self.lname_entry_enter)
+        self.lname_entry.bind('<FocusOut>', self.lname_entry_leave)
+        self.mname_entry.bind('<FocusIn>', self.mname_entry_enter)
+        self.mname_entry.bind('<FocusOut>', self.mname_entry_leave)
+        self.city_entry.bind('<FocusIn>', self.city_entry_enter)
+        self.city_entry.bind('<FocusOut>', self.city_entry_leave)
+        self.province_entry.bind('<FocusIn>', self.province_entry_enter)
+        self.province_entry.bind('<FocusOut>', self.province_entry_leave)
+        self.back_button.bind('<Button-1>', self.onclick_back)
+        self.canvas.bind('<Button-1>', self.canvas_clicked)
+    def update(self):
+        key = self.email
+        db_conn = db_handler.DBHandler()
+        self.user_info = db_conn.view_account(key)
+        db_conn.close()
+
+    def onclick_back(self, event):
+        fname = self.fname_entry.get()
+        mname = self.mname_entry.get()
+        lname = self.lname_entry.get()
+        gender = self.gender_var.get()
+        city = self.city_entry.get()
+        province = self.province_entry.get()
+        status = self.marital_status_var.get()
+        email = self.email
+        if  fname == f'{self.user_info[0].fname}' and mname == f'{self.user_info[0].mname}' and lname == f'{self.user_info[0].lname}' and gender == f'{self.user_info[0].gender}' and city == f'{self.user_info[0].city}' and province == f'{self.user_info[0].province}' and status == f'{self.user_info[0].status}':
+            self.parent.change_frame('ViewPage', email=email)
+        elif fname or mname or lname or gender or city or province or status:
+            confirmed = messagebox.askyesno('Warning', 'Are you sure you want to cancel?')
+            if not confirmed:
+                return
+            else:
+                self.parent.change_frame('ViewPage', email=email)
+        else:
+            return
+        self.back_button.config(bg='#323232')
+
+    def city_entry_enter(self, event):
+        if self.city_entry.get() == f'{self.user_info[0].city}':
+            self.city_entry.delete(0, tk.END)
+            self.city_entry.insert(0, '')
+    
+    def city_entry_leave(self, event):
+        if self.city_entry.get() == '':
+            self.city_entry.delete(0, tk.END)
+            self.city_entry.insert(0, f'{self.user_info[0].city}')
+
+    def province_entry_enter(self, event):
+        if self.province_entry.get() == f'{self.user_info[0].province}':
+            self.province_entry.delete(0, tk.END)
+            self.province_entry.insert(0, '')
+
+    def province_entry_leave(self, event):
+        if self.province_entry.get() == '':
+            self.province_entry.delete(0, tk.END)
+            self.province_entry.insert(0, f'{self.user_info[0].province}')
+
+    def mname_entry_enter(self, event):
+        if self.mname_entry.get() == f'{self.user_info[0].mname}':
+            self.mname_entry.delete(0, tk.END)
+            self.mname_entry.insert(0, '')
+    
+    def mname_entry_leave(self, event):
+        if self.mname_entry.get() == '':
+            self.mname_entry.delete(0, tk.END)
+            self.mname_entry.insert(0, f'{self.user_info[0].mname}')
+
+    def lname_entry_leave(self, event):
+        if self.lname_entry.get() == '':
+            self.lname_entry.delete(0, tk.END)
+            self.lname_entry.insert(0, f'{self.user_info[0].lname}')
+
+    def lname_entry_enter(self, event):
+        if self.lname_entry.get() == f'{self.user_info[0].lname}':
+            self.lname_entry.delete(0, tk.END)
+            self.lname_entry.insert(0, '')
+
+    def fname_entry_enter(self, event):
+        if self.fname_entry.get() == f'{self.user_info[0].fname}':
+            self.fname_entry.delete(0, tk.END)
+            self.fname_entry.insert(0, '')
+            
+
+    def fname_entry_leave(self, event):
+        if self.fname_entry.get() == '' :
+            self.fname_entry.delete(0, tk.END)
+            self.fname_entry.insert(0, f'{self.user_info[0].fname}')
+
+    def canvas_clicked(self, event):
+        self.focus_set()
+
+    def onclick(self, event):
+        email = self.email
+        self.parent.change_frame('ViewPage', email=email)
