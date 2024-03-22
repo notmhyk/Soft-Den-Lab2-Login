@@ -54,6 +54,25 @@ class DBHandler:
         values = (password, email)
         self.cursor.execute(query, values)
         self.conn.commit()
+
+    def edit_info_db(self,email, fname, mname, lname, gender, city, province, status, image_data=None):
+        query = f'UPDATE {self.profile_table} SET first_name = ?, middle_name = ?, last_name = ?, gender = ?, city = ?, province = ?, status = ?'
+        values = (fname, mname, lname, gender, city, province, status)
+
+        if image_data is not None:
+            query += ', image = ?'
+            values += (image_data,)
+
+        query += ' WHERE email = ?'
+        values += (email,)
+
+        try:
+            self.cursor.execute(query, values)
+            self.conn.commit()
+            print("Profile information and image updated successfully")
+        except Exception as e:
+            print("Error updating profile information and image:", e)
+
         
     def view_account(self, key):
         if key is None:

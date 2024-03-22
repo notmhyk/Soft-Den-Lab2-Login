@@ -1473,11 +1473,11 @@ class EditProfile(tk.Frame):
         self.image_label.image = photo
 
         self.change_profile_btn = tk.Button(self, text='Change Profile', font=('Montserrat', 14, 'bold'), 
-                                   fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command="self.upload_image")
+                                   fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command=self.upload_image)
         self.change_profile_btn.place(relx=0.6, rely=0.6, anchor='w')
 
         self.crop_btn = tk.Button(self, text='Crop', font=('Montserrat', 14, 'bold'), 
-                                   fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command="self.start_crop")
+                                   fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command=self.start_crop)
         self.crop_btn.place(relx=0.6, rely=0.7, anchor='w')
 
         self.filter_options = ["Select Filter","Original", "Grayscale", "Blur", "Sharpen",
@@ -1485,12 +1485,12 @@ class EditProfile(tk.Frame):
         self.filter_var = tk.StringVar()
         self.filter_var.set(self.filter_options[0])
 
-        self.filter_menu = tk.OptionMenu(self, self.filter_var, *self.filter_options, command="self.apply_filter")
+        self.filter_menu = tk.OptionMenu(self, self.filter_var, *self.filter_options, command=self.apply_filter)
         self.filter_menu.config(bg='#0c0c0c', fg='#00FF00', font=('Monospac821 BT', 14), width=15, highlightbackground='#0c0c0c', highlightthickness=1)
         self.filter_menu.place(relx=0.6, rely=0.8, anchor='w')
 
         self.save_btn = tk.Button(self, text='Save', font=('Montserrat', 12, 'bold'), 
-                                   fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command="self.upload_image")
+                                   fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command=self.onclick_create)
         self.save_btn.place(relx=0.43, rely=0.8, anchor='w')
 
         self.crop_btn.place_forget()
@@ -1502,7 +1502,128 @@ class EditProfile(tk.Frame):
         self.city_entry.insert(0, f"{self.user_info[0].city}")
         self.province_entry.insert(0, f"{self.user_info[0].province}")
 
+        self.crop_canvas = None
+        self.crop_rect = None
+        self.crop_start = None
+
         self.bind()
+    def apply_filter(self, filter_option):
+        if self.image_label.cget('image') is None:
+            messagebox.showerror("Error", "Please load an image first.")
+            return
+        if self.original_image is None:
+            messagebox.showerror("Error", "Please load an image first.")
+            return
+        try:
+            if filter_option == "Original":
+                self.filtered_image = self.original_image.copy()
+            else:
+                if filter_option == "Grayscale":
+                    self.filtered_image = self.original_image.convert("L")
+                elif filter_option == "Blur":
+                    self.filtered_image = self.original_image.filter(ImageFilter.BLUR)
+                elif filter_option == "Sharpen":
+                    self.filtered_image = self.original_image.filter(ImageFilter.SHARPEN)
+                elif filter_option == "Contour":
+                    self.filtered_image = self.original_image.filter(ImageFilter.CONTOUR)
+                elif filter_option == "Edge Enhance":
+                    self.filtered_image = self.original_image.filter(ImageFilter.EDGE_ENHANCE)
+                elif filter_option == "Emboss":
+                    self.filtered_image = self.original_image.filter(ImageFilter.EMBOSS)
+                elif filter_option == "Smooth":
+                    self.filtered_image = self.original_image.filter(ImageFilter.SMOOTH)
+                elif filter_option == "Brightness":
+                    enhancer = ImageEnhance.Brightness(self.original_image)
+                    self.filtered_image = enhancer.enhance(1.5)
+                elif filter_option == "Contrast":
+                    enhancer = ImageEnhance.Contrast(self.original_image)
+                    self.filtered_image = enhancer.enhance(1.5)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to apply filter: {e}")
+        if self.filtered_image is None:
+            messagebox.showerror("Error", "Failed to apply filter.")
+            return
+
+        self.photo = ImageTk.PhotoImage(self.filtered_image)
+        self.image_label.config(image=self.photo)
+        self.image_label.image = self.photo
+
+    def upload_image(self, event=None):
+        self.filter_menu.place(relx=0.6, rely=0.8, anchor='w')
+        self.crop_btn.place(relx=0.6, rely=0.7, anchor='w')
+        file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.gif")])
+        if file_path:
+            self.original_image = Image.open(file_path)
+            self.original_image = self.original_image.resize((200, 200), Image.LANCZOS)
+            self.filtered_image = self.original_image.copy()
+            self.photo = ImageTk.PhotoImage(self.original_image)
+            self.image_label.config(image=self.photo)
+            self.image_label.image = self.photo
+        else:
+            self.filter_menu.place_forget()
+            self.crop_btn.place_forget()
+
+    def start_crop(self):
+        if self.original_image is None:
+            messagebox.showerror("Error", "Please load an image first.")
+            return
+
+        self.top = tk.Toplevel(self)
+        self.top.title("Crop Image")
+        self.top.resizable(False, False)
+        if hasattr(self, 'original_image'):
+            self.crop_canvas = tk.Canvas(self.top, width=self.original_image.width, height=self.original_image.height)
+            self.crop_canvas.create_image(0, 0, anchor=tk.NW, image=self.photo)
+        elif hasattr(self, 'filtered_image'):
+            self.crop_canvas = tk.Canvas(self.top, width=self.filtered_image.width, height=self.filtered_image.height)
+            self.crop_canvas.create_image(0, 0, anchor=tk.NW, image=self.photo)
+
+        self.crop_canvas.pack()
+        self.crop_canvas.bind("<Button-1>", self.on_crop_start)
+        self.crop_canvas.bind("<B1-Motion>", self.on_crop_drag)
+        self.crop_canvas.bind("<ButtonRelease-1>", self.on_crop_end)
+
+        self.crop_rect = None
+        self.crop_start = None
+
+    def on_crop_start(self, event):
+        self.crop_start = (event.x, event.y)
+        if self.crop_rect:
+            self.crop_canvas.delete(self.crop_rect)
+
+    def on_crop_drag(self, event):
+        if self.crop_rect:
+            self.crop_canvas.delete(self.crop_rect)
+        x0, y0 = self.crop_start
+        x1, y1 = event.x, event.y
+        self.crop_rect = self.crop_canvas.create_rectangle(x0, y0, x1, y1, outline="red")
+
+    def on_crop_end(self, event):
+        if self.crop_rect:
+            self.crop_canvas.delete(self.crop_rect)
+        x0, y0 = self.crop_start
+        x1, y1 = event.x, event.y
+
+        if x0 > x1:
+            x0, x1 = x1, x0
+        if y0 > y1:
+            y0, y1 = y1, y0
+
+        if hasattr(self, 'filtered_image'):
+            self.filtered_image = self.filtered_image.crop((x0, y0, x1, y1))
+            self.filtered_image = self.filtered_image.resize((200, 200), Image.LANCZOS)
+            self.photo = ImageTk.PhotoImage(self.filtered_image)
+            self.image_label.config(image=self.photo)
+            self.image_label.image = self.photo
+        else:
+            self.original_image = self.original_image.crop((x0, y0, x1, y1))
+            self.original_image = self.original_image.resize((200, 200), Image.LANCZOS)
+            self.photo = ImageTk.PhotoImage(self.original_image)
+            self.image_label.config(image=self.photo)
+            self.image_label.image = self.photo
+
+        self.crop_canvas.destroy()
+        self.top.destroy()
 
     def bind(self):
         self.fname_entry.bind('<FocusIn>', self.fname_entry_enter)
@@ -1522,6 +1643,85 @@ class EditProfile(tk.Frame):
         db_conn = db_handler.DBHandler()
         self.user_info = db_conn.view_account(key)
         db_conn.close()
+
+    def validate_input(self, text):
+        regex = "^[A-Za-z ]+$"
+        if re.match(regex, text):
+            return True
+        else:
+            return False
+
+    def onclick_create(self):
+        fname = self.fname_entry.get()
+        mname = self.mname_entry.get()
+        lname = self.lname_entry.get()
+        gender = self.gender_var.get()
+        city = self.city_entry.get()
+        province = self.province_entry.get()
+        status = self.marital_status_var.get()
+        email = self.email
+        
+        if not self.validate_input(fname):
+            messagebox.showerror('Error', 'First Name must contain only letters')
+            return
+        elif not self.validate_input(mname):
+            if mname == 'MI (Optional)':
+                mname = 'N/A'
+            elif not mname.strip():
+                mname = 'N/A'
+            else:
+                messagebox.showerror('Error', 'Middle Name must contain only letters')
+                return
+        elif not self.validate_input(lname):
+            messagebox.showerror('Error', 'Last Name must contain only letters')
+            return
+        elif not len(mname) == 1:
+                messagebox.showerror('Error', 'Middle Name must contain only 1 letter')
+                return
+        if self.gender_var.get() == "Gender":
+            messagebox.showerror('Error', 'Please select gender')
+            return
+        
+        if self.marital_status_var.get() == "Status":
+            messagebox.showerror('Error', 'Please select marital status')
+            return
+
+        if not city.replace(" ", "").isalpha():
+            messagebox.showerror('Error', 'City must contain only letters')
+            return
+        
+        if not province.replace(" ", "").isalpha():
+            messagebox.showerror('Error', 'Province must contain only letters')
+            return
+        image_data = None
+
+        profile = models.Profiles()
+        profile.fname = fname
+        profile.mname = mname
+        profile.lname = lname
+        profile.gender = gender
+        profile.city = city
+        profile.province = province
+        profile.status = status
+
+        if hasattr(self, 'cropped_image'):
+            image_to_save = self.cropped_image
+        elif hasattr(self, 'filtered_image'):
+            image_to_save = self.filtered_image
+        elif hasattr(self, 'original_image'):
+            image_to_save = self.original_image
+
+        if 'image_to_save' in locals():
+            with io.BytesIO() as buffer:
+                image_to_save.save(buffer, format='PNG')
+                image_data = buffer.getvalue()
+
+        db_conn = db_handler.DBHandler()            
+        db_conn.edit_info_db(email, fname, mname, lname, gender, city, province, status, image_data)
+        db_conn.close()
+
+        messagebox.showinfo('Successfully Updated', f'Information updated for {profile.fname}')
+        self.parent.change_frame('LandingPage')
 
     def onclick_back(self, event):
         fname = self.fname_entry.get()
