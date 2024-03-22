@@ -15,7 +15,7 @@ class MainWindow(tk.Tk):
         self.frames['ViewPage'] = pages.ViewPage(self)
         self.change_frame('ViewPage')
 
-    def change_frame(self, name):
+    def change_frame(self, name, **kwargs):
         for frame in self.frames.values():
             frame.grid_forget()
         if name == 'LoginPage':
@@ -27,9 +27,8 @@ class MainWindow(tk.Tk):
         elif name == 'ForgotPassword':
             self.frames[name] = pages.ForgotPassword(self)
         elif name == 'ViewPage':
-            self.frames[name] = pages.ViewPage(self)
+            self.frames[name] = pages.ViewPage(self, **kwargs)
         self.frames[name].grid(row=0, column=0, sticky='nsew')
-        
 
 root = MainWindow()
 root.state('zoomed')

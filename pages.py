@@ -132,7 +132,7 @@ class LoginPage(tk.Frame):
             return
         
         if self.parent.db_handler.acc_login(email, password):
-            self.parent.change_frame('LandingPage')
+            self.parent.change_frame('ViewPage', email=email)
         else:
             messagebox.showerror("Invalid Login", "Invalid username or password")
             return
@@ -1241,14 +1241,59 @@ class LandingPage(tk.Frame):
 
 
 class ViewPage(tk.Frame):
-    def __init__(self, master):
-        tk.Frame.__init__(self, master)
+    def __init__(self, master, email = None, **kwargs):
+        tk.Frame.__init__(self, master, **kwargs)
         self.parent = master
+        self.email = email
         self.master.title('View Profile')
         self.config(background='black')
+        self.back_image_path = 'back.png'
+        master.minsize(width=850, height=592)
+        master.bind('<Unmap>', self.on_minimize)
+        master.bind('<Map>', self.on_restore)
         self.create_labels()
         self.show_canvas()
+        self.get_info()
+    def get_info(self):
+        self.update()
+        
+        self.name.delete(0, tk.END)
+        self.name.insert(0, f"{self.user_info[0].fname} {self.user_info[0].mname}. {self.user_info[0].lname}")
 
+        self.location.delete(0, tk.END)
+        self.location.insert(0, f"{self.user_info[0].city}, {self.user_info[0].province}")
+
+        self.gender.delete(0, tk.END)
+        self.gender.insert(0, f"{self.user_info[0].gender}")
+
+        self.status.delete(0, tk.END)
+        self.status.insert(0, f"{self.user_info[0].status}")
+
+        image_data = self.user_info[0].image_data
+        image = Image.open(io.BytesIO(image_data))
+        image = image.resize((200, 200), Image.LANCZOS)
+        photo = ImageTk.PhotoImage(image)
+        self.profile.config(image=photo)
+        self.profile.image = photo
+
+        self.name.config(state='readonly', fg='#00FF00', readonlybackground="#0c0c0c")
+        self.location.config(state='readonly', fg='#00FF00', readonlybackground="#0c0c0c")
+        self.gender.config(state='readonly', fg='#00FF00', readonlybackground="#0c0c0c")
+        self.status.config(state='readonly', fg='#00FF00', readonlybackground="#0c0c0c")
+        
+    def update(self):
+        print("Received email:", self.email)
+        key = self.email
+        db_conn = db_handler.DBHandler()
+        self.user_info = db_conn.view_account(key)
+        db_conn.close()
+
+    def on_minimize(self, event):
+        self.parent.geometry("850x592")
+
+    def on_restore(self, event):
+        self.parent.geometry("850x592")
+        
     def create_labels(self):
         labels = []
         for i in range(11):
@@ -1276,7 +1321,7 @@ class ViewPage(tk.Frame):
 
     def show_object(self):
         
-        self.profile = tk.Label(self, text='No Image Uploaded', font=('Monospac821 BT', 12), fg='#00FF00', bg='#0c0c0c', cursor='hand2', image='')
+        self.profile = tk.Label(self, text='No Image Uploaded', font=('Monospac821 BT', 12), fg='#00FF00', bg='#0c0c0c', image='')
         self.profile.place(relx=0.44, rely=0.3, anchor='w')
 
         def center_label(event=None):
@@ -1288,6 +1333,13 @@ class ViewPage(tk.Frame):
         center_label()
 
         self.bind("<Configure>", center_label)
+        
+        self.pil_image_back_image = Image.open(self.back_image_path)
+        self.resize_back_image = self.pil_image_back_image.resize((30,30))
+        self.image_back_image = ImageTk.PhotoImage(self.resize_back_image)
+        self.back_button = tk.Label(self, image=self.image_back_image, bg='#121212', cursor='hand2')
+        self.back_button.place(relx=0.92, rely=0.135, anchor='center')
+
 
         self.name = tk.Entry(self, font=('Monospac821 BT', 17), width=30, justify='center', fg='white', bg='#0c0c0c', highlightthickness=0)
         self.name.place(relx=0.5, rely=0.5, anchor='center')
@@ -1305,48 +1357,8 @@ class ViewPage(tk.Frame):
         self.status.place(relx=0.5, rely=0.8, anchor='center')
         self.status.insert(0, "Status")
 
-        self.edit = tk.Label(self, text="Edit", font=('Monospac821 BT', 11, 'underline'), fg='#00FF00', bg='#0c0c0c', cursor='hand2')
-        self.edit.place(relx=0.4, rely=0.87, anchor='w')
-
-        self.save = tk.Label(self, text="Save", font=('Monospac821 BT', 11, 'underline'), fg='#00FF00', bg='#0c0c0c', cursor='hand2')
-        self.save.place(relx=0.58, rely=0.87, anchor='w')
-
-        # self.max_chars_per_line = 22
-        # self.name_text = f"John Mhyk A. Magdangal"
-        # self.formatted_text_name = self.format_text(self.name_text, self.max_chars_per_line)
-        # self.user_name = tk.Label(self, text=self.name_text, font=('Monospac821 BT', 17, 'bold'), fg='#00FF00', bg='#0c0c0c', cursor='hand2')
-        # self.user_name.place(relx=0.4, rely=0.6, anchor='w')
-        
-        # self.address_text = f"San Fernando, Pampanga"
-        # self.formatted_text_address = self.format_text(self.address_text, self.max_chars_per_line)
-        # self.address = tk.Label(self, text=self.formatted_text_address, font=('Monospac821 BT', 20, 'bold'), fg='#00FF00', bg='#0c0c0c', cursor='hand2')
-        # self.address.place(relx=0.13, rely=0.5, anchor='w')
-
-        # self.gender_text = f"Male"
-        # self.gender = tk.Label(self, text=self.gender_text, font=('Monospac821 BT', 20, 'bold'), fg='#00FF00', bg='#0c0c0c', cursor='hand2')
-        # self.gender.place(relx=0.2, rely=0.65, anchor='w')
-
-        # self.status_text = f"Married"
-        # self.status = tk.Label(self, text=self.status_text, font=('Monospac821 BT', 20, 'bold'), fg='#00FF00', bg='#0c0c0c', cursor='hand2')
-        # self.status.place(relx=0.15, rely=0.75, anchor='w')
-
-
-
-        # self.gender_options = ["Gender","Male", "Female", "Others"]
-        # self.gender_var = tk.StringVar()
-        # self.gender_var.set(self.gender_options[0])
-
-        # self.gender = tk.OptionMenu(self, self.gender_var, *self.gender_options)
-        # self.gender.config(bg='#0c0c0c', fg='#00FF00', font=('Monospac821 BT', 14), width=15, highlightbackground='#0c0c0c', highlightthickness=1)
-        # self.gender.place(relx=0.18, rely=0.65, anchor='w')
-
-        # self.marital_status_options = ["Status","Single","Married","Widowed","Divorced","Separated","Annulled","In a Relationship","Other"]
-        # self.marital_status_var = tk.StringVar()
-        # self.marital_status_var.set(self.marital_status_options[0])
-        # self.marital_status_menu = tk.OptionMenu(self, self.marital_status_var, *self.marital_status_options)
-        # self.marital_status_menu.config(bg='#0c0c0c', fg='#00FF00', font=('Monospac821 BT', 14), width=15, highlightbackground='#0c0c0c', highlightthickness=1)
-        # self.marital_status_menu.place(relx=0.18, rely=0.75, anchor='w')
-
+        self.edit = tk.Label(self, text="Edit", font=('Monospac821 BT', 11, 'underline'), fg='#FFFFFF', bg='#0c0c0c', cursor='hand2')
+        self.edit.place(relx=0.49, rely=0.87, anchor='w')
         
     def format_text(self, text, max_chars):
         if len(text) <= max_chars:

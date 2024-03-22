@@ -1,9 +1,9 @@
 class Profiles:
     def __init__(self):
+        self.id = 0
         self.fname = ''
         self.mname = ''
         self.lname = ''
-        # self.contact = 0
         self.gender = ''
         self.city = ''
         self.province = ''

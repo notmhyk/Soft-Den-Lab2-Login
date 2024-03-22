@@ -54,6 +54,30 @@ class DBHandler:
         values = (password, email)
         self.cursor.execute(query, values)
         self.conn.commit()
+        
+    def view_account(self, key):
+        if key is None:
+            key = '%'
+        else:
+            key = '%' + key + '%'
+        query = f'SELECT first_name, middle_name, last_name, gender, city, province, status, image FROM {self.profile_table} WHERE email LIKE ?'
+
+        values = (key,)
+        self.cursor.execute(query, values)
+
+        user_info = []
+        for row in self.cursor:
+            user = models.Profiles()
+            user.fname = row[0]
+            user.mname = row[1]
+            user.lname = row[2]
+            user.gender = row[3]
+            user.city = row[4]
+            user.province = row[5]
+            user.status = row[6]
+            user.image_data = row[7]
+            user_info.append(user)
+        return user_info
 
     def close(self):
         self.conn.close()
