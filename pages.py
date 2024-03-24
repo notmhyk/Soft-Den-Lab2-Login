@@ -202,20 +202,22 @@ class SignUpPage(tk.Frame):
         self.original_image = None
         self.create_labels()
         self.show_canvas()
-        def center_option_menus(event=None):
-            window_width = self.winfo_width()
+        self.after(100, self.center_option_menus)
+        master.bind("<Configure>", self.center_option_menus)
+    def center_option_menus(self, event=None):
+        window_width = self.winfo_width()
 
-            marital_status_width = self.marital_status_menu.winfo_reqwidth()
-            marital_status_x = (window_width * 0.078) - (marital_status_width / 2)
+        marital_status_width = self.marital_status_menu.winfo_reqwidth()
+        marital_status_x = (window_width * 0.078) - (marital_status_width / 2)
 
-            gender_width = self.gender.winfo_reqwidth()
-            gender_x = (window_width * 0.075) - (gender_width / 2)
+        gender_width = self.gender.winfo_reqwidth()
+        gender_x = (window_width * 0.075) - (gender_width / 2)
 
-            self.marital_status_menu.place(x=marital_status_x, rely=0.85, anchor='w')
-            self.gender.place(x=gender_x, rely=0.6, anchor='w')
+        self.marital_status_menu.place(x=marital_status_x, rely=0.85, anchor='w')
+        self.gender.place(x=gender_x, rely=0.6, anchor='w')
 
-        center_option_menus()
-        master.bind("<Configure>", center_option_menus)
+        # center_option_menus()
+        
 
     def on_minimize_signup(self, event):
         self.parent.geometry("1062x638")
@@ -1230,26 +1232,260 @@ class ForgotPassword(tk.Frame):
     def back_btn1(self, event):
         self.parent.change_frame('LoginPage')
 
+# class LandingPage(tk.Frame):
+#     def __init__(self, master, email = None, **kwargs):
+#         tk.Frame.__init__(self, master)
+#         self.parent = master
+#         self.master.title('Landing Page')
+#         self.email = email
+#         self.config(background='black')
+#         self.label = tk.Label(self, text='LANDING PAGE')
+#         self.label.grid(row=0, column=0)
+#         self.label.bind('<Button-1>', self.logout)
+
+#         self.label2 = tk.Label(self, text='View PRofile')
+#         self.label2.grid(row=1, column=0)
+#         self.label2.bind('<Button-1>', self.view_profile)
+
+#     def logout(self, event):
+#         self.parent.change_frame('LoginPage')
+
+#     def view_profile(self, event):
+#         self.parent.change_frame('ViewPage', email=self.email)
+
 class LandingPage(tk.Frame):
-    def __init__(self, master, email = None, **kwargs):
-        tk.Frame.__init__(self, master)
-        self.parent = master
-        self.master.title('Landing Page')
+    def __init__(self, parent, email = None, *args, **kwargs):
+        super().__init__(parent, *args, **kwargs)
+
+        self.configure(bg="black")
+        self.is_calculator_on = True
+
+        self.text_strVar = tk.StringVar(value="0")
+        self.operator_var = tk.StringVar(value="")
+        self.operator = None
+        self.first_number = None
+        self.reset_next_entry = False
         self.email = email
-        self.config(background='black')
-        self.label = tk.Label(self, text='LANDING PAGE')
-        self.label.grid(row=0, column=0)
-        self.label.bind('<Button-1>', self.logout)
 
-        self.label2 = tk.Label(self, text='View PRofile')
-        self.label2.grid(row=1, column=0)
-        self.label2.bind('<Button-1>', self.view_profile)
+        self.textBox = tk.Entry(self, textvariable=self.text_strVar, font=("Arial", 50), justify='right', bg="lightgrey")
+        self.textBox.grid(row=0, column=0, columnspan=4, padx=5, pady=5, sticky="ew")
 
-    def logout(self, event):
-        self.parent.change_frame('LoginPage')
+        validation = self.register(self.validate_input)
+        self.textBox.config(validate="key", validatecommand=(validation, '%P'))
+        
+        num_lb = [
+            "1", "2", "3",
+            "4", "5", "6",
+            "7", "8", "9",
+            "0", "00", ".",
+        ]
 
-    def view_profile(self, event):
-        self.parent.change_frame('ViewPage', email=self.email)
+        for idx, button_data in enumerate(num_lb):
+            label_num = tk.Label(self, text=button_data, font=("Arial", 40), bg="black", fg="green", width=4, height=2, cursor='hand2', highlightthickness=2)
+            label_num.grid(row=idx // 3 + 3, column=idx % 3, padx=0, pady=0, sticky="nsew")
+            label_num.bind("<Button-1>", lambda event, num=button_data: self.update_entry(num))
+            label_num.bind("<Enter>", self.change_color_enter)
+            label_num.bind("<Leave>", self.change_color_leave)
+
+        operators_lb = ["÷", "×", "−", "+", "="]
+
+        for idx, operators in enumerate(operators_lb):
+            label_operators = tk.Label(self, text=operators, font=("Arial", 40), bg="black", fg="green", width=4, height=2, cursor='hand2', highlightthickness=2)
+            label_operators.grid(row=idx + 2, column=3, padx=0, pady=0, sticky="nsew")
+            if operators == "=": 
+                label_operators.bind("<Button-1>", lambda event: self.calculate())
+            else:
+                label_operators.bind("<Button-1>", lambda event, op=operators: self.update_operators(op))
+            label_operators.bind("<Enter>", self.change_color_enter)
+            label_operators.bind("<Leave>", self.change_color_leave)
+        
+        clear_btns = ["On/Off", "C", "AC"]
+
+        for idx, btns in enumerate(clear_btns):
+            if btns == "On/Off":
+                label_btns = tk.Label(self, text=btns, font=("Arial", 40), background="#50C878", foreground="black", cursor="hand2", highlightthickness=2, width=4, height=2)
+            else:
+                label_btns = tk.Label(self, text=btns, font=("Arial", 40), bg="black", fg="green", width=4, height=2, cursor='hand2', highlightthickness=2) 
+            if idx == 0:  
+                label_btns.grid(row=2, column=idx, padx=0, pady=0, sticky="ew", columnspan=idx+1)
+            else: 
+                label_btns.grid(row=2, column=idx, padx=0, pady=0, sticky="ew")
+            if btns == "C":
+                label_btns.bind("<Button-1>", lambda event: self.clear_entry())
+            elif btns == "AC":
+                label_btns.bind("<Button-1>", lambda event: self.all_clear())
+            elif btns == "On/Off":
+                label_btns.bind("<Button-1>", lambda event: (self.toggle_entry_state(), self.change_color_onOff_click(event)))
+            label_btns.bind("<Enter>", self.change_color_enter)
+            label_btns.bind("<Leave>", self.change_color_leave)
+
+        for i in range(4):  
+            self.columnconfigure(i, weight=1)
+        for i in range(13):  
+            self.rowconfigure(i, weight=1)
+        
+
+        self.bind("<Key>", self.on_key_press)
+        self.create_top_section()
+        self.focus_set()
+        self.textBox.bind("<Key>", self.on_key_press)
+        
+    def create_top_section(self):
+        header_frame = tk.Frame(self, bg='black')
+        header_frame.grid(row=0, column=0, columnspan=5, sticky="ew")
+
+        top_label = tk.Label(header_frame, text="Welcome to Dashboard!", font=("Arial", 24), bg="black", fg="green")
+        top_label.pack(side="left", expand=True, fill="both")
+
+        profile_button_font = ("Arial", 24)
+        button_width = 12 
+        profile_button = tk.Button(header_frame, text="View Profile", font=profile_button_font, bg="black", fg="green", command=self.view_profile, width=button_width)
+        logout_button = tk.Button(header_frame, text="Log out", font=profile_button_font, bg="black", fg="green", command=self.log_out, width=button_width)
+
+        logout_button.pack(side="right", fill="both",padx=5)
+        profile_button.pack(side="right", fill="both", padx=5)
+        
+
+        self.textBox.grid(row=1, column=0, columnspan=5, padx=5, pady=5, sticky="ew")
+
+        self.rowconfigure(0, minsize=self.textBox.winfo_reqheight())
+
+    def change_color_onOff_click(self, event):
+        current_bg_color = event.widget.cget("bg")
+        if current_bg_color == "#50C878":  
+            event.widget.config(bg="#C70039", fg="white")
+        else:  
+            event.widget.config(bg="#50C878", fg="black")
+
+    def change_color_enter(self, event):
+        if self.is_calculator_on and event.widget.cget("text") != "On/Off":
+            event.widget.config(bg="green", fg="black")
+
+    def change_color_leave(self, event):
+        if self.is_calculator_on and event.widget.cget("text") != "On/Off":
+            event.widget.config(bg="black", fg="green") 
+    
+    def toggle_entry_state(self):
+        self.focus_set()
+        current_state = self.textBox['state']
+        if current_state == 'normal':
+            self.all_clear()
+            self.textBox.config(state='readonly')
+            for label in self.grid_slaves():
+                if isinstance(label, tk.Label) and label.cget("text") != "On/Off":
+                    label.unbind("<Button-1>")
+            self.is_calculator_on = False 
+        else:
+            self.textBox.config(state='normal')
+            for label in self.grid_slaves():
+                if isinstance(label, tk.Label) and label.cget("text") != "On/Off":
+                    label.bind("<Button-1>", self.label_click_event)
+            self.is_calculator_on = True
+
+    def label_click_event(self, event):
+        label_text = event.widget.cget("text")
+        if label_text.isdigit() or label_text in [".", "00"]:
+            self.update_entry(label_text)
+        
+    def clear_entry(self):
+        self.text_strVar.set('0')
+
+    def all_clear(self):
+        self.text_strVar.set('0')
+        self.operator = None
+        self.first_number = None
+        self.reset_next_entry = False
+
+    def validate_input(self, new_text):
+        if new_text == "" or new_text == "Error":
+            return True
+        try:
+            float(new_text) 
+            return True
+        except ValueError:
+            return False
+    
+    def update_entry(self, value):
+        if self.text_strVar.get() == "Error":
+            return
+        if self.reset_next_entry:
+            self.text_strVar.set('')
+            self.reset_next_entry = False
+
+        cursor_position = self.textBox.index(tk.INSERT)
+        current_text = self.text_strVar.get()
+
+        if current_text == "0" and value not in ["00", "."]:
+            new_text = value
+        else:
+            if value == '00' and not current_text.startswith('0'):
+                if cursor_position == 0 or (current_text[cursor_position - 1] in '0123456789'):
+                    pass
+                else:
+                    return
+
+            if value == '.' and '.' in current_text.split()[-1]:
+                return
+
+            new_text = current_text[:cursor_position] + value + current_text[cursor_position:]
+
+        if self.validate_input(new_text):
+            self.text_strVar.set(new_text)
+            self.textBox.icursor(cursor_position + len(value))
+
+    def update_operators(self, operator):
+        operator_conversion = {"÷": "/", "×": "*", "−": "-", "+": "+"}
+        if operator in operator_conversion:
+            operator = operator_conversion[operator]
+
+        if self.text_strVar.get() and (self.first_number is None or self.reset_next_entry):
+            self.first_number = self.text_strVar.get()
+            self.operator = operator
+            self.reset_next_entry = True
+            self.text_strVar.set('')
+
+    def calculate(self):
+        if not self.operator or self.reset_next_entry:
+            return
+        second_number = self.text_strVar.get().lstrip("0") or "0"  
+        first_number = self.first_number.lstrip("0") or "0"
+
+        try:
+            expression = f"{first_number}{self.operator}{second_number}"
+            result = eval(expression)
+            self.text_strVar.set(str(result))
+        except Exception as e:
+            self.text_strVar.set("Error")
+        finally:
+            self.first_number = None
+            self.operator = None
+            self.reset_next_entry = False
+
+    def on_key_press(self, event):
+        char = event.char
+        keysym = event.keysym
+        
+        if char in '0123456789':
+            self.update_entry(char)
+        elif char in '+-*/':
+            self.update_operators(char)
+        elif keysym == 'Return':
+            self.calculate()
+        elif keysym == 'Escape':
+            self.all_clear()
+        elif keysym == 'BackSpace':
+            self.clear_entry()
+        elif char == '.':
+            self.update_entry(char)
+
+    def view_profile(self):
+        self.master.change_frame('ViewPage', email=self.email)
+
+    def log_out(self):
+        confirm_logout = tk.messagebox.askyesno("Confirm Log Out", "Are you sure you want to log out?")
+        if confirm_logout:
+            self.master.change_frame('LoginPage')
+
 
 class ViewPage(tk.Frame):
     def __init__(self, master, email = None, **kwargs):
