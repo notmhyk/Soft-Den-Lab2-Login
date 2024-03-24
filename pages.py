@@ -1,22 +1,29 @@
+# import tkinter as tk
+# from tkinter import ttk
+# from tkinter import scrolledtext
+# from tkinter import filedialog, simpledialog
+# from PIL import Image, ImageTk, ImageOps, ImageEnhance, ImageFilter
+# from tkinter import messagebox
+# from random import randint
+# from email.message import EmailMessage
+# from captcha.image import ImageCaptcha
+# import ssl
+# import smtplib
+# # import sqlite3
+# import db_handler
+# import models
+# import re
+# import io
+# import os
+# import string
+# import random
 import tkinter as tk
-from tkinter import ttk
-from tkinter import scrolledtext
-from tkinter import filedialog, simpledialog
+from tkinter import ttk, scrolledtext, filedialog, simpledialog, messagebox
 from PIL import Image, ImageTk, ImageOps, ImageEnhance, ImageFilter
-from tkinter import messagebox
-from random import randint
+from random import randint, random
 from email.message import EmailMessage
 from captcha.image import ImageCaptcha
-import ssl
-import smtplib
-# import sqlite3
-import db_handler
-import models
-import re
-import io
-import os
-import string
-import random
+import ssl, smtplib, db_handler, models, re, io, os, string
 
 class FadingLabel(tk.Label):
     def __init__(self, master=None, **kwargs):
@@ -724,14 +731,13 @@ By logging into the platform, users acknowledge that they have read, understood,
 
         def delete_captcha(captcha_image_file):
             os.remove(captcha_image_file)
-            print("CAPTCHA image deleted successfully!")
 
         def generate_new_captcha():
             nonlocal captcha_text, captcha_image_file
 
             if os.path.exists(captcha_image_file):
                 os.remove(captcha_image_file)
-                print("Previous CAPTCHA image deleted successfully!")
+                
 
             captcha_text, captcha_image_file = generate_captcha()
             new_captcha_image = Image.open(captcha_image_file)
@@ -1111,8 +1117,6 @@ class ForgotPassword(tk.Frame):
 
     def check_otp(self, email):
         otp = self.confirm_otp.get().strip()
-        print("Entered OTP:", otp)
-        print("Stored OTP:", self.otp_code)
         if self.otp_code != otp :
             messagebox.showerror("Error", "OTP does not match")
             return
@@ -1236,7 +1240,6 @@ class LandingPage(tk.Frame):
         self.label = tk.Label(self, text='LANDING PAGE')
         self.label.grid(row=0, column=0)
         self.label.bind('<Button-1>', self.logout)
-        print("This is the email from landingpage",self.email)
 
         self.label2 = tk.Label(self, text='View PRofile')
         self.label2.grid(row=1, column=0)
@@ -1290,7 +1293,6 @@ class ViewPage(tk.Frame):
         self.status.config(state='readonly', fg='#00FF00', readonlybackground="#0c0c0c")
         
     def update(self):
-        print("Received email:", self.email)
         key = self.email
         db_conn = db_handler.DBHandler()
         self.user_info = db_conn.view_account(key)
@@ -1486,6 +1488,7 @@ class EditProfile(tk.Frame):
 
         image_data = self.user_info[0].image_data
         image = Image.open(io.BytesIO(image_data))
+        self.original_image = image
         image = image.resize((200, 200), Image.LANCZOS)
         photo = ImageTk.PhotoImage(image)
         self.image_label.config(image=photo)
@@ -1512,8 +1515,8 @@ class EditProfile(tk.Frame):
                                    fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command=self.onclick_create)
         self.save_btn.place(relx=0.43, rely=0.8, anchor='w')
 
-        self.crop_btn.place_forget()
-        self.filter_menu.place_forget()
+        # self.crop_btn.place_forget()
+        # self.filter_menu.place_forget()
 
         self.fname_entry.insert(0, f"{self.user_info[0].fname}")
         self.mname_entry.insert(0, f"{self.user_info[0].mname}")
@@ -1579,8 +1582,7 @@ class EditProfile(tk.Frame):
             self.image_label.config(image=self.photo)
             self.image_label.image = self.photo
         else:
-            self.filter_menu.place_forget()
-            self.crop_btn.place_forget()
+            return 
 
     def start_crop(self):
         if self.original_image is None:
@@ -1589,13 +1591,14 @@ class EditProfile(tk.Frame):
 
         self.top = tk.Toplevel(self)
         self.top.title("Crop Image")
+        photo = ImageTk.PhotoImage(self.original_image)
         self.top.resizable(False, False)
         if hasattr(self, 'original_image'):
             self.crop_canvas = tk.Canvas(self.top, width=self.original_image.width, height=self.original_image.height)
-            self.crop_canvas.create_image(0, 0, anchor=tk.NW, image=self.photo)
+            self.crop_canvas.create_image(0, 0, anchor=tk.NW, image=photo)
         elif hasattr(self, 'filtered_image'):
             self.crop_canvas = tk.Canvas(self.top, width=self.filtered_image.width, height=self.filtered_image.height)
-            self.crop_canvas.create_image(0, 0, anchor=tk.NW, image=self.photo)
+            self.crop_canvas.create_image(0, 0, anchor=tk.NW, image=photo)
 
         self.crop_canvas.pack()
         self.crop_canvas.bind("<Button-1>", self.on_crop_start)
@@ -1604,6 +1607,7 @@ class EditProfile(tk.Frame):
 
         self.crop_rect = None
         self.crop_start = None
+        self.image = photo
 
     def on_crop_start(self, event):
         self.crop_start = (event.x, event.y)
