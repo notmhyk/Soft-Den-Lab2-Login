@@ -55,7 +55,7 @@ class DBHandler:
         old_password = self.cursor.fetchone()
 
         if old_password and password == old_password[0]:
-            messagebox.showerror("Error", "New password cannot be the same as the old password")
+            messagebox.showerror("Error", "New password is the same as the old password")
             return False
         elif old_password and password != old_password[0]:
             query = f'UPDATE {self.profile_table} SET password =? WHERE email =?'

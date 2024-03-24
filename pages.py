@@ -1,22 +1,3 @@
-# import tkinter as tk
-# from tkinter import ttk
-# from tkinter import scrolledtext
-# from tkinter import filedialog, simpledialog
-# from PIL import Image, ImageTk, ImageOps, ImageEnhance, ImageFilter
-# from tkinter import messagebox
-# from random import randint
-# from email.message import EmailMessage
-# from captcha.image import ImageCaptcha
-# import ssl
-# import smtplib
-# # import sqlite3
-# import db_handler
-# import models
-# import re
-# import io
-# import os
-# import string
-# import random
 import tkinter as tk
 from tkinter import ttk, scrolledtext, filedialog, simpledialog, messagebox
 from PIL import Image, ImageTk, ImageOps, ImageEnhance, ImageFilter
@@ -558,7 +539,7 @@ By logging into the platform, users acknowledge that they have read, understood,
             elif not mname.strip():
                 mname = ''
             else:
-                messagebox.showerror('Error', 'Middle Name must contain only letters')
+                messagebox.showerror('Error', 'Middle Initial must contain only letters')
                 return
         elif not self.validate_input(lname):
             messagebox.showerror('Error', 'Last Name must contain only letters')
@@ -593,7 +574,7 @@ By logging into the platform, users acknowledge that they have read, understood,
             messagebox.showerror("Error", "Please upload an image first.")
             return
         
-        elif '@gmail.com' not in email:
+        if email.count('@') != 1 or not email.endswith('@gmail.com'):
             messagebox.showerror("Error", "Please enter a valid Gmail address.")
             return
         
@@ -604,7 +585,7 @@ By logging into the platform, users acknowledge that they have read, understood,
         elif mname.isalpha():
             pass
         else:
-            messagebox.showerror('Error', 'Middle Name must contain only letterszz')
+            messagebox.showerror('Error', 'Middle Initial must contain only letterszz')
             return
 
         self.confirm_email_otp()
@@ -737,7 +718,7 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.resend_lb = tk.Label(self.pop_up_frame, text="", font=('Monospac821 BT', 10, 'bold'), fg='#00FF00', bg='#0c0c0c')
         self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 1.5, window=self.resend_lb)
 
-        def  generate_captcha(text_length = 4, folder = 'captcha'):
+        def  generate_captcha(text_length = 3, folder = 'captcha'):
             characters = string.ascii_letters + string.digits
             captcha_text = ''.join(random.choices(characters, k=text_length))
             captcha = ImageCaptcha()
@@ -801,7 +782,7 @@ By logging into the platform, users acknowledge that they have read, understood,
             elif mname.isalpha():
                 pass
             else:
-                messagebox.showerror('Error', 'Middle Name must contain only letters')
+                messagebox.showerror('Error', 'Middle Initial must contain only letters')
                 return
             profile.mname = mname
             if entered_otp != otp_code:
@@ -1497,7 +1478,7 @@ class ViewPage(tk.Frame):
         self.update()
         
         self.name.delete(0, tk.END)
-        self.name.insert(0, f"{self.user_info[0].fname} {self.user_info[0].mname}. {self.user_info[0].lname}")
+        self.name.insert(0, f"{self.user_info[0].fname} {self.user_info[0].mname} {self.user_info[0].lname}")
 
         self.location.delete(0, tk.END)
         self.location.insert(0, f"{self.user_info[0].city}, {self.user_info[0].province}")
@@ -1934,7 +1915,7 @@ class EditProfile(tk.Frame):
             elif not mname.strip():
                 mname = 'N/A'
             else:
-                messagebox.showerror('Error', 'Middle Name must contain only letters')
+                messagebox.showerror('Error', 'Middle Initial must contain only letters')
                 return
         elif not self.validate_input(lname):
             messagebox.showerror('Error', 'Last Name must contain only letters')
@@ -1963,7 +1944,7 @@ class EditProfile(tk.Frame):
         elif mname.isalpha():
             pass
         else:
-            messagebox.showerror('Error', 'Middle Name must contain only letters')
+            messagebox.showerror('Error', 'Middle Initial must contain only letters')
             return
         image_data = None
 
