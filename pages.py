@@ -216,8 +216,6 @@ class SignUpPage(tk.Frame):
 
         self.marital_status_menu.place(x=marital_status_x, rely=0.85, anchor='w')
         self.gender.place(x=gender_x, rely=0.6, anchor='w')
-
-        # center_option_menus()
         
 
     def on_minimize_signup(self, event):
@@ -558,9 +556,6 @@ By logging into the platform, users acknowledge that they have read, understood,
         elif not self.validate_input(lname):
             messagebox.showerror('Error', 'Last Name must contain only letters')
             return
-        # elif not len(mname) == 1:
-        #         messagebox.showerror('Error', 'Middle Name must contain only 1 letter')
-        #         return
         
         if self.gender_var.get() == "Gender":
             messagebox.showerror('Error', 'Please select gender')
@@ -596,7 +591,7 @@ By logging into the platform, users acknowledge that they have read, understood,
             return
         
         if mname == 'Middle Initial':
-                mname = ''
+            mname = ''
         elif not mname.strip():
             mname = ''
         elif mname.isalpha():
@@ -1238,27 +1233,6 @@ class ForgotPassword(tk.Frame):
     def back_btn1(self, event):
         self.parent.change_frame('LoginPage')
 
-# class LandingPage(tk.Frame):
-#     def __init__(self, master, email = None, **kwargs):
-#         tk.Frame.__init__(self, master)
-#         self.parent = master
-#         self.master.title('Landing Page')
-#         self.email = email
-#         self.config(background='black')
-#         self.label = tk.Label(self, text='LANDING PAGE')
-#         self.label.grid(row=0, column=0)
-#         self.label.bind('<Button-1>', self.logout)
-
-#         self.label2 = tk.Label(self, text='View PRofile')
-#         self.label2.grid(row=1, column=0)
-#         self.label2.bind('<Button-1>', self.view_profile)
-
-#     def logout(self, event):
-#         self.parent.change_frame('LoginPage')
-
-#     def view_profile(self, event):
-#         self.parent.change_frame('ViewPage', email=self.email)
-
 class LandingPage(tk.Frame):
     def __init__(self, parent, email = None, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
@@ -1491,7 +1465,6 @@ class LandingPage(tk.Frame):
         confirm_logout = tk.messagebox.askyesno("Confirm Log Out", "Are you sure you want to log out?")
         if confirm_logout:
             self.master.change_frame('LoginPage')
-
 
 class ViewPage(tk.Frame):
     def __init__(self, master, email = None, **kwargs):
@@ -1757,14 +1730,17 @@ class EditProfile(tk.Frame):
                                    fg='#00FF00', bg='#0c0c0c', width=15, cursor='hand2', command=self.onclick_create)
         self.save_btn.place(relx=0.43, rely=0.8, anchor='w')
 
-        # self.crop_btn.place_forget()
-        # self.filter_menu.place_forget()
 
         self.fname_entry.insert(0, f"{self.user_info[0].fname}")
         self.mname_entry.insert(0, f"{self.user_info[0].mname}")
         self.lname_entry.insert(0, f"{self.user_info[0].lname}")
         self.city_entry.insert(0, f"{self.user_info[0].city}")
         self.province_entry.insert(0, f"{self.user_info[0].province}")
+
+        self.bind_validation(self.fname_entry)
+        self.bind_validation(self.lname_entry)
+        self.bind_validation(self.city_entry)
+        self.bind_validation(self.province_entry)
 
         self.crop_canvas = None
         self.crop_rect = None
@@ -1910,11 +1886,21 @@ class EditProfile(tk.Frame):
         db_conn.close()
 
     def validate_input(self, text):
-        regex = "^[A-Za-z ]+$"
+        regex = "^[A-Za-z ]*$"
         if re.match(regex, text):
             return True
         else:
             return False
+    def validate_mname(self, text):
+        return len(text) <= 1 and self.validate_input(text)
+    
+    def bind_validation(self, entry, validate_func=None):
+        entry.config(validate="key")
+        if validate_func:
+            entry.config(validatecommand=(self.register(validate_func), "%P"))
+        else:
+            entry.config(validatecommand=(self.register(self.validate_input), "%P"))
+
 
     def onclick_create(self):
         fname = self.fname_entry.get()
@@ -1940,9 +1926,7 @@ class EditProfile(tk.Frame):
         elif not self.validate_input(lname):
             messagebox.showerror('Error', 'Last Name must contain only letters')
             return
-        elif not len(mname) == 1:
-                messagebox.showerror('Error', 'Middle Name must contain only 1 letter')
-                return
+        
         if self.gender_var.get() == "Gender":
             messagebox.showerror('Error', 'Please select gender')
             return
@@ -1957,6 +1941,16 @@ class EditProfile(tk.Frame):
         
         if not province.replace(" ", "").isalpha():
             messagebox.showerror('Error', 'Province must contain only letters')
+            return
+
+        if mname == f"{self.user_info[0].mname}":
+            mname = f"{self.user_info[0].mname}"
+        elif not mname.strip():
+            mname = ""
+        elif mname.isalpha():
+            pass
+        else:
+            messagebox.showerror('Error', 'Middle Name must contain only letters')
             return
         image_data = None
 
@@ -2032,12 +2026,14 @@ class EditProfile(tk.Frame):
     def mname_entry_enter(self, event):
         if self.mname_entry.get() == f'{self.user_info[0].mname}':
             self.mname_entry.delete(0, tk.END)
+            self.mname_entry.config(validate="key")
             self.mname_entry.insert(0, '')
-    
+            self.bind_validation(self.mname_entry, self.validate_mname)
     def mname_entry_leave(self, event):
         if self.mname_entry.get() == '':
             self.mname_entry.delete(0, tk.END)
-            self.mname_entry.insert(0, f'{self.user_info[0].mname}')
+            # self.mname_entry.config(validate="none")
+            # self.mname_entry.insert(0, f'{self.user_info[0].mname}')
 
     def lname_entry_leave(self, event):
         if self.lname_entry.get() == '':
