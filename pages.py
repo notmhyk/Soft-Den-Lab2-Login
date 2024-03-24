@@ -25,6 +25,7 @@ import random
 from email.message import EmailMessage
 from captcha.image import ImageCaptcha
 import ssl, smtplib, db_handler, models, re, io, os, string
+import _tkinter
 
 class FadingLabel(tk.Label):
     def __init__(self, master=None, **kwargs):
@@ -192,7 +193,7 @@ class LoginPage(tk.Frame):
             self.focus_set()
 
 class SignUpPage(tk.Frame):
-    def __init__(self, master):
+    def __init__(self, master=None):
         tk.Frame.__init__(self, master)
         self.parent = master
         self.parent.title('Sign Up')
@@ -203,19 +204,7 @@ class SignUpPage(tk.Frame):
         self.original_image = None
         self.create_labels()
         self.show_canvas()
-        self.after(100, self.center_option_menus)
-        master.bind("<Configure>", self.center_option_menus)
-    def center_option_menus(self, event=None):
-        window_width = self.winfo_width()
-
-        marital_status_width = self.marital_status_menu.winfo_reqwidth()
-        marital_status_x = (window_width * 0.078) - (marital_status_width / 2)
-
-        gender_width = self.gender.winfo_reqwidth()
-        gender_x = (window_width * 0.075) - (gender_width / 2)
-
-        self.marital_status_menu.place(x=marital_status_x, rely=0.85, anchor='w')
-        self.gender.place(x=gender_x, rely=0.6, anchor='w')
+        self.after(4000, self.center_option_menus)
         
 
     def on_minimize_signup(self, event):
@@ -390,8 +379,26 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.crop_canvas = None
         self.crop_rect = None
         self.crop_start = None
-
+        self.master.bind("<Configure>", self.center_option_menus)
         self.bind()
+    def center_option_menus(self, event=None):
+        try:
+            if event:
+                window_width = self.winfo_width()
+            else:
+                window_width = self.parent.winfo_width() 
+
+            marital_status_width = self.marital_status_menu.winfo_reqwidth()
+            marital_status_x = (window_width * 0.078) - (marital_status_width / 2)
+
+            gender_width = self.gender.winfo_reqwidth()
+            gender_x = (window_width * 0.075) - (gender_width / 2)
+
+            self.marital_status_menu.place(x=marital_status_x, rely=0.85, anchor='w')
+            self.gender.place(x=gender_x, rely=0.6, anchor='w')
+        except _tkinter.TclError as e:
+            # print("An error occurred:", e)
+            pass
 
     def apply_filter(self, filter_option):
         if self.image_label.cget('image') is None:
@@ -599,8 +606,6 @@ By logging into the platform, users acknowledge that they have read, understood,
         else:
             messagebox.showerror('Error', 'Middle Name must contain only letterszz')
             return
-        
-        print("Value of mname before saving to database:", mname)
 
         self.confirm_email_otp()
 
@@ -1069,10 +1074,17 @@ class ForgotPassword(tk.Frame):
         self.confirm_otp = tk.Entry(self, font=('Monospac821 BT', 14), width=20, justify='center', fg='white', bg='#323232')
         self.confirm_otp.place(relx=0.5, rely=0.45, anchor='center')
 
+        self.bind_validation(self.confirm_otp)
+
         self.confirm_otp_btn = tk.Button(self, text='Confirm OTP', font=('Montserrat', 17, 'bold'), 
                                    fg='#00FF00', bg='#0c0c0c', width=25, cursor='hand2', command=lambda: self.check_otp(email))
         self.confirm_otp_btn.place(relx=0.5, rely=0.6, anchor='center')
-
+    def validate_input(self, text):
+        regex = "^[0-9]*$"
+        return re.match(regex, text) is not None
+    def bind_validation(self, entry):
+        entry.config(validate="key")
+        entry.config(validatecommand=(self.register(self.validate_input), "%P"))
     def send_otp(self):
         email = self.entry_email.get()
         
@@ -1210,9 +1222,10 @@ class ForgotPassword(tk.Frame):
             messagebox.showerror("Error", "Passwords do not match")
             return
         else:
-            self.parent.db_handler.change_pass(email_to_change, password)
-            messagebox.showinfo("Success", "Password changed successfully")
-            self.parent.change_frame('LoginPage')
+            success = self.parent.db_handler.change_pass(email_to_change, password)
+            if success:
+                messagebox.showinfo("Success", "Password changed successfully")
+                self.parent.change_frame('LoginPage')
         
         
     def back_btn3(self, event):

@@ -50,10 +50,19 @@ class DBHandler:
             return False
 
     def change_pass(self, email, password):
-        query = f'UPDATE {self.profile_table} SET password =? WHERE email =?'
-        values = (password, email)
-        self.cursor.execute(query, values)
-        self.conn.commit()
+        query_old_password = f'SELECT password FROM {self.profile_table} WHERE email = ?'
+        self.cursor.execute(query_old_password, (email,))
+        old_password = self.cursor.fetchone()
+
+        if old_password and password == old_password[0]:
+            messagebox.showerror("Error", "New password cannot be the same as the old password")
+            return False
+        elif old_password and password != old_password[0]:
+            query = f'UPDATE {self.profile_table} SET password =? WHERE email =?'
+            values = (password, email)
+            self.cursor.execute(query, values)
+            self.conn.commit()
+            return True
 
     def edit_info_db(self,email, fname, mname, lname, gender, city, province, status, image_data=None):
         query = f'UPDATE {self.profile_table} SET first_name = ?, middle_name = ?, last_name = ?, gender = ?, city = ?, province = ?, status = ?'
