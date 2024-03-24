@@ -20,7 +20,8 @@
 import tkinter as tk
 from tkinter import ttk, scrolledtext, filedialog, simpledialog, messagebox
 from PIL import Image, ImageTk, ImageOps, ImageEnhance, ImageFilter
-from random import randint, random
+from random import randint
+import random
 from email.message import EmailMessage
 from captcha.image import ImageCaptcha
 import ssl, smtplib, db_handler, models, re, io, os, string
@@ -373,11 +374,14 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.filter_menu.config(bg='#0c0c0c', fg='#00FF00', font=('Monospac821 BT', 14), width=15, highlightbackground='#0c0c0c', highlightthickness=1)
         self.filter_menu.place(relx=0.67, rely=0.8, anchor='w')
 
-        self.image_data_list = []
-        self.current_index = -1  
-
+        self.bind_validation(self.fname_entry)
+        self.bind_validation(self.lname_entry)
+        self.bind_validation(self.city_entry)
+        self.bind_validation(self.province_entry)
+        
+    
         self.fname_entry.insert(0, 'First Name')
-        self.mname_entry.insert(0, 'MI (Optional)')
+        self.mname_entry.insert(0, 'Middle Initial')
         self.lname_entry.insert(0, 'Last Name')
         self.city_entry.insert(0, 'City')
         self.province_entry.insert(0, 'Province')
@@ -505,12 +509,19 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.top.destroy()
 
     def validate_input(self, text):
-        regex = "^[A-Za-z ]+$"
-        if re.match(regex, text):
-            return True
+        regex = "^[A-Za-z ]*$"
+        return re.match(regex, text) is not None
+    
+    def validate_mname(self, text):
+        return len(text) <= 1 and self.validate_input(text)
+    
+    def bind_validation(self, entry, validate_func=None):
+        entry.config(validate="key")
+        if validate_func:
+            entry.config(validatecommand=(self.register(validate_func), "%P"))
         else:
-            return False
-        
+            entry.config(validatecommand=(self.register(self.validate_input), "%P"))
+
     def onclick_create(self):
         
         fname = self.fname_entry.get()
@@ -537,19 +548,19 @@ By logging into the platform, users acknowledge that they have read, understood,
             messagebox.showerror('Error', 'First Name must contain only letters')
             return
         elif not self.validate_input(mname):
-            if mname == 'MI (Optional)':
-                mname = 'N/A'
+            if mname == 'Middle Initial':
+                mname = ''
             elif not mname.strip():
-                mname = 'N/A'
+                mname = ''
             else:
                 messagebox.showerror('Error', 'Middle Name must contain only letters')
                 return
         elif not self.validate_input(lname):
             messagebox.showerror('Error', 'Last Name must contain only letters')
             return
-        elif not len(mname) == 1:
-                messagebox.showerror('Error', 'Middle Name must contain only 1 letter')
-                return
+        # elif not len(mname) == 1:
+        #         messagebox.showerror('Error', 'Middle Name must contain only 1 letter')
+        #         return
         
         if self.gender_var.get() == "Gender":
             messagebox.showerror('Error', 'Please select gender')
@@ -567,17 +578,10 @@ By logging into the platform, users acknowledge that they have read, understood,
             messagebox.showerror('Error', 'Province must contain only letters')
             return
         
-        # if len(contact) != 13:
-        #     messagebox.showerror('Error', 'Contact Number must be 13 digits')
-        #     return
-        
         if len(password) <= 5:
             messagebox.showerror('Error', 'Password must be at least 6 characters')
             return
         
-        # if not (contact.replace("+", "").isdigit()):
-        #     messagebox.showerror('Error', 'Contact Number must start (+63)')
-        #     return
         
         if self.chk_box_var.get() == 0:
             messagebox.showwarning('Terms & Conditions', 'Terms & condition is unchecked')
@@ -590,7 +594,18 @@ By logging into the platform, users acknowledge that they have read, understood,
         elif '@gmail.com' not in email:
             messagebox.showerror("Error", "Please enter a valid Gmail address.")
             return
-
+        
+        if mname == 'Middle Initial':
+                mname = ''
+        elif not mname.strip():
+            mname = ''
+        elif mname.isalpha():
+            pass
+        else:
+            messagebox.showerror('Error', 'Middle Name must contain only letterszz')
+            return
+        
+        print("Value of mname before saving to database:", mname)
 
         self.confirm_email_otp()
 
@@ -608,8 +623,6 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.confirm_pass_entry.bind('<FocusIn>', self.confirm_pass_entry_enter)
         self.confirm_pass_entry.bind('<FocusOut>', self.confirm_pass_entry_leave)
         self.canvas.bind('<Button-1>', self.canvas_clicked)
-        # self.contact_entry.bind('<FocusIn>', self.contact_entry_enter)
-        # self.contact_entry.bind('<FocusOut>', self.contact_entry_leave)
         self.city_entry.bind('<FocusIn>', self.city_entry_enter)
         self.city_entry.bind('<FocusOut>', self.city_entry_leave)
         self.province_entry.bind('<FocusIn>', self.province_entry_enter)
@@ -629,7 +642,7 @@ By logging into the platform, users acknowledge that they have read, understood,
         password = self.pass_entry.get()
         confirm_password = self.confirm_pass_entry.get()
 
-        if  fname == 'First Name' and mname == 'MI (Optional)' and lname == 'Last Name' and gender == 'Gender' and city == 'City' and province == 'Province' and status == "Status" and email == 'Email' and password == 'Password' and confirm_password == 'Confirm Password':
+        if  fname == 'First Name' and mname == 'Middle Initial' and lname == 'Last Name' and gender == 'Gender' and city == 'City' and province == 'Province' and status == "Status" and email == 'Email' and password == 'Password' and confirm_password == 'Confirm Password':
             self.parent.change_frame('LoginPage')
         elif fname or mname or lname or gender or city or province or status or email or password or confirm_password:
             confirmed = messagebox.askyesno('Warning', 'Are you sure you want to cancel?')
@@ -710,8 +723,14 @@ By logging into the platform, users acknowledge that they have read, understood,
         self.label = tk.Label(self.pop_up_frame, text='OTP has been sent to your Email', font=('Monospac821 BT', 15, 'bold'), fg='#00FF00', bg='#0c0c0c')
         self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 5, window=self.label)
 
+        def validate_input(text):
+            return text.isdigit() or text == ""
+        
         self.otp_entry = tk.Entry(self.pop_up_frame, font=('Monospac821 BT', 14), width=20, justify='center', fg='white', bg='#323232')
         self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 2, window=self.otp_entry)
+
+        self.otp_entry.config(validate="key")
+        self.otp_entry.config(validatecommand=(self.register(validate_input), "%P"))
 
         remaining_time = 180
 
@@ -760,20 +779,12 @@ By logging into the platform, users acknowledge that they have read, understood,
 
         captcha_entry = tk.Entry(self.pop_up_frame, font=('Monospac821 BT', 14), width=20, justify='center', fg='white', bg='#323232')
         self.canvas.create_window(self.canvas_width // 1.4, self.canvas_height // 0.6, window=captcha_entry)
-
-        def validate_input(text):
-            regex = "^[A-Za-z ]+$"
-            if re.match(regex, text):
-                return True
-            else:
-                return False
         
         def upload_data_to_db():
             mname = self.mname_entry.get()
             profile = models.Profiles()
             profile.fname = fname
             profile.lname = lname
-            # profile.contact = contact
             profile.gender = gender
             profile.city = city
             profile.province = province
@@ -783,14 +794,15 @@ By logging into the platform, users acknowledge that they have read, understood,
 
             entered_otp = self.otp_entry.get()
 
-            if not validate_input(mname):
-                if mname == 'MI (Optional)':
-                    mname = 'N/A'
-                elif not mname.strip():
-                    mname = 'N/A'
-                else:
-                    messagebox.showerror('Error', 'Middle Name must contain only letters')
-                    return
+            if mname == 'Middle Initial':
+                    mname = ''
+            elif not mname.strip():
+                mname = ''
+            elif mname.isalpha():
+                pass
+            else:
+                messagebox.showerror('Error', 'Middle Name must contain only letters')
+                return
             profile.mname = mname
             if entered_otp != otp_code:
                 messagebox.showerror('Error', 'OTP is wrong')
@@ -880,16 +892,6 @@ By logging into the platform, users acknowledge that they have read, understood,
         if self.province_entry.get() == '':
             self.province_entry.delete(0, tk.END)
             self.province_entry.insert(0, 'Province')
-
-    # def contact_entry_enter(self, event):
-    #     if self.contact_entry.get() == 'Contact Number':
-    #         self.contact_entry.delete(0, tk.END)
-    #         self.contact_entry.insert(0, '+63')
-            
-    # def contact_entry_leave(self, event):
-    #     if self.contact_entry.get() == '' or self.contact_entry.get() == '+63':
-    #         self.contact_entry.delete(0, tk.END)
-    #         self.contact_entry.insert(0, 'Contact Number')
     
     def confirm_pass_entry_enter(self, event):
         if self.confirm_pass_entry.get() == 'Confirm Password':
@@ -914,14 +916,18 @@ By logging into the platform, users acknowledge that they have read, understood,
             self.email_entry.insert(0, '')
 
     def mname_entry_enter(self, event):
-        if self.mname_entry.get() == 'MI (Optional)':
+         if self.mname_entry.get() == 'Middle Initial':
             self.mname_entry.delete(0, tk.END)
+            self.mname_entry.config(validate="key") 
             self.mname_entry.insert(0, '')
+            self.bind_validation(self.mname_entry, self.validate_mname)
     
     def mname_entry_leave(self, event):
         if self.mname_entry.get() == '':
             self.mname_entry.delete(0, tk.END)
-            self.mname_entry.insert(0, 'MI (Optional)')
+            self.mname_entry.config(validate="none")
+            self.mname_entry.insert(0, 'Middle Initial')
+            
 
     def lname_entry_leave(self, event):
         if self.lname_entry.get() == '':
